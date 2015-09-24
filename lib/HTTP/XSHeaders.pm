@@ -56,7 +56,7 @@ XSLoader::load( 'HTTP::XSHeaders', $VERSION );
     no warnings qw<redefine once>;
     for my $key (qw/content-length content-language content-encoding title user-agent server from warnings www-authenticate authorization proxy-authenticate proxy-authorization/) {
       (my $meth = $key) =~ s/-/_/g;
-      no strict 'refs';
+      no strict 'refs'; ## no critic
       *{ "HTTP::Headers::Fast::$meth" } = sub {
           # print STDERR "*** GONZO: method [$meth]\n";
           (shift->header($key, @_))[0];
@@ -164,8 +164,8 @@ sub content_type_charset {
         return $ct, $charset if wantarray;
         return $charset;
     }
-    return undef, undef if wantarray;
-    return undef;
+    return undef, undef if wantarray; ## no critic
+    return undef; ## no critic
 }
 
 sub referer {
@@ -214,21 +214,65 @@ __END__
 
 =head1 NAME
 
-HTTP::XSHeaders - HTTP::Headers::Fast with XS and a C data structure
+HTTP::XSHeaders - Fast XS Header library, replacing HTTP::Headers and
+HTTP::Headers::Fast
 
 =head1 SYNOPSIS
 
     # load once
     use HTTP::XSHeaders;
 
-    # keep using HTTP::Headers::Fast as you wish
+    # keep using HTTP::Headers or HTTP::Headers::Fast as you wish
 
 =head1 DESCRIPTION
 
 By loading L<HTTP::XSHeaders> anywhere, you replace any usage
-of L<HTTP::Headers::Fast> with the XS implementation.
+of L<HTTP::Headers> and L<HTTP::Headers::Fast> with a fast C implementation.
 
-You can continue to use L<HTTP::Headers::Fast> and any other module that
-depends on it just like you did before. It's just faster now.
+You can continue to use L<HTTP::Headers> and L<HTTP::Headers::Fast> and any
+other module that depends on them just like you did before. It's just faster
+now.
+
+=head1 COMPATIBILITY
+
+While we keep compatibility with L<HTTP::Headers> and L<HTTP::Headers::Fast>,
+we've taken the liberty to make several changes that were deemed reasonable
+and sane:
+
+=over 4
+
+=item * Aligning in C<as_string> method
+
+C<as_string> method does weird stuff in order to keep the same indentation.
+This is unnecessary and unhelpful. We simply add one space for indentation.
+
+=item * No messing around in header names and casing
+
+The headers are stored as given (C<MY-HeaDER> stays C<MY-HeaDER>) and
+compared as lowercase. We do not uppercase or lowercase anything (other
+than for comparing header names internally).
+
+=item * Case normalization using leading colon is not supported
+
+Following the previous item, we also do not normalized based on leading
+colon.
+
+=item * C<$TRANSLATE_UNDERSCORE> is not supported
+
+C<$TRANSLATE_UNDERSCORE> (which controls whether underscores are translated
+or not) is not supported. It's barely documented (or isn't at all), it isn't
+used by anything on CPAN, nor can we find any use-case other than the tests.
+
+=back
 
 =head1 METHODS
+
+=head1 TODO
+
+=over 4
+
+=item * Add ENV variable to control what classes are overridden
+
+=item * Fix skipped tests (or remove them)
+
+=back
