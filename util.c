@@ -346,7 +346,7 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
   }
 
   if (! saw_newline) {
-    pos = string_append(buf, pos, newl);
+    pos = string_append(buf, last_nonblank+1, newl);
     last_nonblank = pos-1;
   }
   buf[++last_nonblank] = '\0';
