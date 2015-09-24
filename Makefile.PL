@@ -11,7 +11,10 @@ WriteMakefile(
         'XSLoader'            => 0,
         'HTTP::Headers::Fast' => '0.18',
     },
-    AUTHOR         => 'Gonzalo Diethelm (gonzus@cpan.org)',
+    AUTHOR         => [
+        'Gonzalo Diethelm (gonzus@cpan.org)',
+        'Sawyer X (xsawyerx@cpan.org)',
+    ],
     LIBS           => [''],
 #    DEFINE         => '-DGMEM_CHECK',
 #    DEFINE         => '-DGLOG_SHOW',
