@@ -4,7 +4,7 @@ use strict;
 use Test qw(plan ok);
 use Test::Requires 'URI';
 
-plan tests => 164;
+plan tests => 154;
 
 my($h, $h2);
 sub j { join("|", @_) }
