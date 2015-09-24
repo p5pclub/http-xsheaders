@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok);
+use Test qw(plan ok skip);
 use Test::Requires 'URI';
 
 plan tests => 154;
@@ -171,7 +171,7 @@ ok($h->header("Date") =~ /^[A-Z][a-z][a-z], \d\d .* GMT$/);
 }
 
 if ($] < 5.006) {
-   Test::skip("Can't call variable method", 1) for 1..13;
+   skip("Can't call variable method", 1) for 1..13;
 }
 else {
 # other date fields
@@ -245,7 +245,7 @@ ok($h->referer, "http://www.example.com/");
     ok($h->referrer->as_string, "http://www.example.com");
 }
 
-Test::skip( "aligning is boring", $h->as_string, <<EOT);
+ok($h->as_string, <<EOT);
 From: Gisle\@ActiveState.com
 Referer: http://www.example.com
 User-Agent: Mozilla/1.2
@@ -346,7 +346,7 @@ $h = HTTP::Headers::Fast->new(
 	e => "foo\n  bar  ",
 	f => "foo\n bar\n  baz\nbaz",
      );
-Test::skip( "ugh, spacing...", $h->as_string("<<\n"), <<EOT);
+ok($h->as_string("<<\n"), <<EOT);
 A: foo<<
 B: foo<<
  bar<<
