@@ -39,3 +39,4 @@ HTTP-XSHeaders-*/
 *.o
 *.bs
 *.swp
+XSHeaders.c
