@@ -337,7 +337,7 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
       }
     } else {
       if (saw_newline) {
-        buf[pos++] = '\t';
+        buf[pos++] = ' ';
       }
       buf[pos++] = str[j];
       last_nonblank = pos-1;
