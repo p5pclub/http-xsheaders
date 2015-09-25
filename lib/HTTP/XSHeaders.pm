@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use XSLoader;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 require HTTP::Headers::Fast;
 XSLoader::load( 'HTTP::XSHeaders', $VERSION );
@@ -212,10 +212,16 @@ __END__
 
 =pod
 
+=encoding utf8
+
 =head1 NAME
 
 HTTP::XSHeaders - Fast XS Header library, replacing HTTP::Headers and
 HTTP::Headers::Fast
+
+=head1 VERSION
+
+Version 0.12
 
 =head1 SYNOPSIS
 
@@ -243,8 +249,9 @@ and sane:
 
 =item * Aligning in C<as_string> method
 
-C<as_string> method does weird stuff in order to keep the same indentation.
-This is unnecessary and unhelpful. We simply add one space for indentation.
+C<as_string> method does weird stuff in order to keep the original
+indentation.  This is unnecessary and unhelpful. We simply add one space as
+indentation after the first newline.
 
 =item * No messing around in header names and casing
 
@@ -254,25 +261,31 @@ than for comparing header names internally).
 
 =item * Case normalization using leading colon is not supported
 
-Following the previous item, we also do not normalized based on leading
-colon.
+Following the previous item, we also do not normalize based on leading colon.
 
 =item * C<$TRANSLATE_UNDERSCORE> is not supported
 
-C<$TRANSLATE_UNDERSCORE> (which controls whether underscores are translated
-or not) is not supported. It's barely documented (or isn't at all), it isn't
-used by anything on CPAN, nor can we find any use-case other than the tests.
+C<$TRANSLATE_UNDERSCORE> (which controls whether underscores are translated or
+not) is not supported. It's barely documented (or isn't at all), it isn't used
+by anything on CPAN, nor can we find any use-case other than the tests. So,
+instead, we always convert underscores to dashes.
 
 =back
 
 =head1 METHODS
+
+=head1 AUTHORS
+
+=over 4
+
+=item * Gonzalo Diethelm C<< gonzus AT cpan DOT org >>
+
+=item * Sawyer X C<< xsawyerx AT cpan DOT org >>
 
 =head1 TODO
 
 =over 4
 
 =item * Add ENV variable to control what classes are overridden
-
-=item * Fix skipped tests (or remove them)
 
 =back
