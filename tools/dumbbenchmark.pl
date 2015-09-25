@@ -2,16 +2,12 @@ use strict;
 use warnings;
 use Dumbbench;
 use HTTP::Headers;
+use HTTP::Headers::Fast;
 use List::Util;
 use Text::Table;
 use Getopt::Long qw<:config no_ignore_case>;
 
 local $| = 1;
-
-BEGIN {
-    local $ENV{'PERL_HTTP_HEADERS_FAST_XS'} = 0;
-    require HTTP::Headers::Fast;
-}
 
 my %source = (
     'Connection'     => 'close',
@@ -190,10 +186,10 @@ foreach my $name ( keys %cases ) {
 
 $verbose and print "\n";
 
-require HTTP::Headers::Fast::XS;
+require HTTP::XSHeaders;
 print "HTTP::Headers $HTTP::Headers::VERSION, "
     . "HTTP::Headers::Fast $HTTP::Headers::Fast::VERSION, "
-    . "HTTP::Headers::Fast::XS $HTTP::Headers::Fast::XS::VERSION\n";
+    . "HTTP::XSHeaders $HTTP::XSHeaders::VERSION\n";
 
 foreach my $name ( sort keys %instances ) {
     my @cb_names = sort keys %{ $cases{$name} };
@@ -206,7 +202,7 @@ foreach my $name ( sort keys %instances ) {
 
     $bench->add_instances(
         Dumbbench::Instance::PerlSub->new(
-            name => "${_}_xs",
+            name => "xsheaders_$_",
             code => $cases{$name}{$_},
         )
     ) for grep m{^fast}, @cb_names;
