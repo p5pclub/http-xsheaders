@@ -236,8 +236,20 @@ By loading L<HTTP::XSHeaders> anywhere, you replace any usage
 of L<HTTP::Headers> and L<HTTP::Headers::Fast> with a fast C implementation.
 
 You can continue to use L<HTTP::Headers> and L<HTTP::Headers::Fast> and any
-other module that depends on them just like you did before. It's just faster
+other module that depends on them just like you did before.  It's just faster
 now.
+
+=head1 WHY
+
+HTTP::XSHeaders is a complete departure from L<HTTP::Headers> and
+L<HTTP::Headers::Fast>, in that it uses its own C data structure to store
+everything.  We are very much aware of L<HTTP::Headers::Fast::XS> (in fact, we
+are part of the authors of that module); the purpose in having both modules is
+to be able to compare them side by side, by writing tests and benchmarks that
+use them both.
+
+Be aware that this is a work in progress.  Once we feel it is stable, the
+version will be bumped to 1.0.
 
 =head1 COMPATIBILITY
 
@@ -250,13 +262,13 @@ and sane:
 =item * Aligning in C<as_string> method
 
 C<as_string> method does weird stuff in order to keep the original
-indentation.  This is unnecessary and unhelpful. We simply add one space as
+indentation.  This is unnecessary and unhelpful.  We simply add one space as
 indentation after the first newline.
 
 =item * No messing around in header names and casing
 
 The headers are stored as given (C<MY-HeaDER> stays C<MY-HeaDER>) and
-compared as lowercase. We do not uppercase or lowercase anything (other
+compared as lowercase.  We do not uppercase or lowercase anything (other
 than for comparing header names internally).
 
 =item * Case normalization using leading colon is not supported
@@ -266,9 +278,9 @@ Following the previous item, we also do not normalize based on leading colon.
 =item * C<$TRANSLATE_UNDERSCORE> is not supported
 
 C<$TRANSLATE_UNDERSCORE> (which controls whether underscores are translated or
-not) is not supported. It's barely documented (or isn't at all), it isn't used
-by anything on CPAN, nor can we find any use-case other than the tests. So,
-instead, we always convert underscores to dashes.
+not) is not supported.  It's barely documented (or isn't at all), it isn't
+used by anything on CPAN, nor can we find any use-case other than the tests.
+So, instead, we always convert underscores to dashes.
 
 =back
 
