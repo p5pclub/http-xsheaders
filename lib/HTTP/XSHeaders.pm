@@ -275,7 +275,7 @@ interface that is mostly compatible with both L<HTTP::Headers> and
 L<HTTP::Headers::Fast>.
 
 This module attempts to replace C<HTTP::Headers>, C<HTTP::Headers::Fast>,
-and the XS imeplemntation of it, C<HTTP::Headers::Fast::XS>. We attempt to
+and the XS implementation of it, C<HTTP::Headers::Fast::XS>. We attempt to
 continue developing this module and perhaps deprecate
 C<HTTP::Headers::Fast::XS>.
 
@@ -463,6 +463,8 @@ Same as C<referer> but in proper English (unlike the HTTP spec).
 =item * Gonzalo Diethelm C<< gonzus AT cpan DOT org >>
 
 =item * Sawyer X C<< xsawyerx AT cpan DOT org >>
+
+=back
 
 =head1 THANKS
 
