@@ -6,10 +6,9 @@ WriteMakefile(
     VERSION_FROM   => 'lib/HTTP/XSHeaders.pm',
     ABSTRACT_FROM  => 'lib/HTTP/XSHeaders.pm',
     PREREQ_PM      => {
-        'Test::More'          => 0,
-        'Exporter'            => '5.57',
-        'XSLoader'            => 0,
-        'HTTP::Headers::Fast' => '0.18',
+        'Test::More' => 0,
+        'Exporter'   => '5.57',
+        'XSLoader'   => 0,
     },
     AUTHOR         => [
         'Gonzalo Diethelm (gonzus@cpan.org)',
