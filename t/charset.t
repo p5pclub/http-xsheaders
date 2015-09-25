@@ -1,11 +1,9 @@
 use strict;
 
-use Test::More;
-plan tests => 2;
+use Test::More tests => 3;
+BEGIN { use_ok('HTTP::XSHeaders') }
 
-use HTTP::XSHeaders;
-
-my $h = HTTP::Headers::Fast->new;
+my $h = HTTP::XSHeaders->new;
 is($h->content_type_charset, undef);
 
 $h->content_type('text/plain; charset="iso-8859-1"');

@@ -3,62 +3,73 @@ use strict;
 use warnings;
 use XSLoader;
 
-our $VERSION = '0.12';
+our $VERSION = '0.200000';
 
-require HTTP::Headers::Fast;
+eval {
+    require HTTP::Headers::Fast;
+
+    # HTTP::Headers::Fast
+    *HTTP::Headers::Fast::new                    = *HTTP::XSHeaders::new;
+    *HTTP::Headers::Fast::DESTROY                = *HTTP::XSHeaders::DESTROY;
+    *HTTP::Headers::Fast::clone                  = *HTTP::XSHeaders::clone;
+    *HTTP::Headers::Fast::header                 = *HTTP::XSHeaders::header;
+    *HTTP::Headers::Fast::clear                  = *HTTP::XSHeaders::clear;
+    *HTTP::Headers::Fast::push_header            = *HTTP::XSHeaders::push_header;
+    *HTTP::Headers::Fast::init_header            = *HTTP::XSHeaders::init_header;
+    *HTTP::Headers::Fast::remove_header          = *HTTP::XSHeaders::remove_header;
+    *HTTP::Headers::Fast::remove_content_headers = *HTTP::XSHeaders::remove_content_headers;
+    *HTTP::Headers::Fast::as_string              = *HTTP::XSHeaders::as_string;
+    *HTTP::Headers::Fast::as_string_without_sort = *HTTP::XSHeaders::as_string_without_sort;
+    *HTTP::Headers::Fast::header_field_names     = *HTTP::XSHeaders::header_field_names;
+    *HTTP::Headers::Fast::scan                   = *HTTP::XSHeaders::scan;
+
+    # Implemented in Pure-Perl
+    # (candidates to move to XS)
+    *HTTP::Headers::Fast::_date_header          = *HTTP::XSHeaders::_date_header;
+    *HTTP::Headers::Fast::content_type          = *HTTP::XSHeaders::content_type;
+    *HTTP::Headers::Fast::content_type_charset  = *HTTP::XSHeaders::content_type_charset;
+    *HTTP::Headers::Fast::referer               = *HTTP::XSHeaders::referer;
+    *HTTP::Headers::Fast::referrer              = *HTTP::XSHeaders::referer;
+    *HTTP::Headers::Fast::_basic_auth           = *HTTP::XSHeaders::_basic_auth;
+};
+
+eval {
+    require HTTP::Headers;
+
+    # HTTP::Headers
+    *HTTP::Headers::new                    = *HTTP::XSHeaders::new;
+    *HTTP::Headers::clone                  = *HTTP::XSHeaders::clone;
+    *HTTP::Headers::header                 = *HTTP::XSHeaders::header;
+    *HTTP::Headers::clear                  = *HTTP::XSHeaders::clear;
+    *HTTP::Headers::push_header            = *HTTP::XSHeaders::push_header;
+    *HTTP::Headers::init_header            = *HTTP::XSHeaders::init_header;
+    *HTTP::Headers::remove_header          = *HTTP::XSHeaders::remove_header;
+    *HTTP::Headers::remove_content_headers = *HTTP::XSHeaders::remove_content_headers;
+    *HTTP::Headers::as_string              = *HTTP::XSHeaders::as_string;
+    *HTTP::Headers::header_field_names     = *HTTP::XSHeaders::header_field_names;
+    *HTTP::Headers::scan                   = *HTTP::XSHeaders::scan;
+
+    # Implemented in Pure-Perl
+    *HTTP::Headers::_date_header           = *HTTP::XSHeaders::_date_header;
+    *HTTP::Headers::content_type           = *HTTP::XSHeaders::content_type;
+    *HTTP::Headers::content_type_charset   = *HTTP::XSHeaders::content_type_charset;
+    *HTTP::Headers::referer                = *HTTP::XSHeaders::referer;
+    *HTTP::Headers::referrer               = *HTTP::XSHeaders::referer;
+    *HTTP::Headers::_basic_auth            = *HTTP::XSHeaders::_basic_auth;
+};
+
 XSLoader::load( 'HTTP::XSHeaders', $VERSION );
-
-# Implemented in XS
-*HTTP::Headers::Fast::new =
-    *HTTP::XSHeaders::new;
-*HTTP::Headers::Fast::DESTROY =
-    *HTTP::XSHeaders::DESTROY;
-*HTTP::Headers::Fast::clone =
-    *HTTP::XSHeaders::clone;
-*HTTP::Headers::Fast::header =
-    *HTTP::XSHeaders::header;
-*HTTP::Headers::Fast::clear =
-    *HTTP::XSHeaders::clear;
-*HTTP::Headers::Fast::push_header =
-    *HTTP::XSHeaders::push_header;
-*HTTP::Headers::Fast::init_header =
-    *HTTP::XSHeaders::init_header;
-*HTTP::Headers::Fast::remove_header =
-    *HTTP::XSHeaders::remove_header;
-*HTTP::Headers::Fast::remove_content_headers =
-    *HTTP::XSHeaders::remove_content_headers;
-*HTTP::Headers::Fast::as_string =
-    *HTTP::XSHeaders::as_string;
-*HTTP::Headers::Fast::as_string_without_sort =
-    *HTTP::XSHeaders::as_string_without_sort;
-*HTTP::Headers::Fast::header_field_names =
-    *HTTP::XSHeaders::header_field_names;
-*HTTP::Headers::Fast::scan =
-    *HTTP::XSHeaders::scan;
-
-# Implemented in Pure-Perl
-# (candidates to move to XS)
-*HTTP::Headers::Fast::_date_header =
-    *HTTP::XSHeaders::_date_header;
-*HTTP::Headers::Fast::content_type =
-    *HTTP::XSHeaders::content_type;
-*HTTP::Headers::Fast::content_type_charset =
-    *HTTP::XSHeaders::content_type_charset;
-*HTTP::Headers::Fast::referer =
-    *HTTP::XSHeaders::referer;
-*HTTP::Headers::Fast::referrer =
-    *HTTP::XSHeaders::referer;
-
-*HTTP::Headers::Fast::_basic_auth =
-    *HTTP::XSHeaders::_basic_auth;
 
 {
     no warnings qw<redefine once>;
     for my $key (qw/content-length content-language content-encoding title user-agent server from warnings www-authenticate authorization proxy-authenticate proxy-authorization/) {
       (my $meth = $key) =~ s/-/_/g;
       no strict 'refs'; ## no critic
+      *{ "HTTP::Headers::$meth" } = sub {
+          (shift->header($key, @_))[0];
+      };
+
       *{ "HTTP::Headers::Fast::$meth" } = sub {
-          # print STDERR "*** GONZO: method [$meth]\n";
           (shift->header($key, @_))[0];
       };
     }
@@ -217,11 +228,11 @@ __END__
 =head1 NAME
 
 HTTP::XSHeaders - Fast XS Header library, replacing HTTP::Headers and
-HTTP::Headers::Fast
+HTTP::Headers::Fast.
 
 =head1 VERSION
 
-Version 0.12
+Version 0.200000
 
 =head1 SYNOPSIS
 
@@ -230,45 +241,62 @@ Version 0.12
 
     # keep using HTTP::Headers or HTTP::Headers::Fast as you wish
 
+=head1 ALPHA RELEASE
+
+This is a work in progress. Once we feel it is stable, the version will be
+bumped to 1.0. Until then, feel free to use and try and submit tickets, but
+do this at your own risk.
+
 =head1 DESCRIPTION
 
 By loading L<HTTP::XSHeaders> anywhere, you replace any usage
 of L<HTTP::Headers> and L<HTTP::Headers::Fast> with a fast C implementation.
 
 You can continue to use L<HTTP::Headers> and L<HTTP::Headers::Fast> and any
-other module that depends on them just like you did before.  It's just faster
+other module that depends on them just like you did before. It's just faster
 now.
 
 =head1 WHY
 
-HTTP::XSHeaders is a complete departure from L<HTTP::Headers> and
-L<HTTP::Headers::Fast>, in that it uses its own C data structure to store
-everything.  We are very much aware of L<HTTP::Headers::Fast::XS> (in fact, we
-are part of the authors of that module); the purpose in having both modules is
-to be able to compare them side by side, by writing tests and benchmarks that
-use them both.
+First there was L<HTTP::Headers>. It's good, stable, and ubiquitous. However,
+it's slow.
 
-Be aware that this is a work in progress.  Once we feel it is stable, the
-version will be bumped to 1.0.
+Along came L<HTTP::Headers::Fast>. Gooder, stable, and used internally by
+L<Plack>, so you know it means business.
+
+Not fast enough, we implemented an XS version of it, released under the name
+L<HTTP::Headers::Fast::XS>. It was a successful experiment. However, we
+thought we could do better.
+
+L<HTTP::XSHeaders> provides a complete rework of the headers library with the
+intent of being fast, lean, and clear. It does not attempt to implement the
+original algorithm, but instead uses its own C-level implementation with an
+interface that is mostly compatible with both L<HTTP::Headers> and
+L<HTTP::Headers::Fast>.
+
+This module attempts to replace C<HTTP::Headers>, C<HTTP::Headers::Fast>,
+and the XS imeplemntation of it, C<HTTP::Headers::Fast::XS>. We attempt to
+continue developing this module and perhaps deprecate
+C<HTTP::Headers::Fast::XS>.
 
 =head1 COMPATIBILITY
 
-While we keep compatibility with L<HTTP::Headers> and L<HTTP::Headers::Fast>,
-we've taken the liberty to make several changes that were deemed reasonable
-and sane:
+While we keep compatibility with the interfaces of L<HTTP::Headers> and
+L<HTTP::Headers::Fast>, we've taken the liberty to make several changes that
+were deemed reasonable and sane:
 
 =over 4
 
 =item * Aligning in C<as_string> method
 
 C<as_string> method does weird stuff in order to keep the original
-indentation.  This is unnecessary and unhelpful.  We simply add one space as
+indentation. This is unnecessary and unhelpful. We simply add one space as
 indentation after the first newline.
 
 =item * No messing around in header names and casing
 
 The headers are stored as given (C<MY-HeaDER> stays C<MY-HeaDER>) and
-compared as lowercase.  We do not uppercase or lowercase anything (other
+compared as lowercase. We do not uppercase or lowercase anything (other
 than for comparing header names internally).
 
 =item * Case normalization using leading colon is not supported
@@ -278,9 +306,18 @@ Following the previous item, we also do not normalize based on leading colon.
 =item * C<$TRANSLATE_UNDERSCORE> is not supported
 
 C<$TRANSLATE_UNDERSCORE> (which controls whether underscores are translated or
-not) is not supported.  It's barely documented (or isn't at all), it isn't
+not) is not supported. It's barely documented (or isn't at all), it isn't
 used by anything on CPAN, nor can we find any use-case other than the tests.
 So, instead, we always convert underscores to dashes.
+
+=item * L<Storable> is loaded but not used
+
+Both L<HTTP::Headers> and L<HTTP::Headers::Fast> use L<Storable> for cloning.
+While C<HTTP::Headers> loads it automatically, C<HTTP::Headers::Fast> loads
+it lazily.
+
+Since we override both, we load C<Storable> always. However, we do not use
+it for cloning and instead implemented our C-level struct cloning.
 
 =back
 

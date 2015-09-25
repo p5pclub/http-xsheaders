@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use HTTP::XSHeaders;
+plan skip_all => 'HTTP::Headers::Fast is necessary' unless eval "use HTTP::Headers::Fast; 1;";
 plan tests => 5;
 
 my $h = HTTP::Headers::Fast->new();

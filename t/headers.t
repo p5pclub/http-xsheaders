@@ -2,7 +2,8 @@
 
 use strict;
 use Test qw(plan ok skip);
-use Test::Requires 'URI';
+eval { require URI; 1; }
+or do { print "1..0 # SKIP URI is required for this test\n"; exit 0; };
 
 plan tests => 154;
 
