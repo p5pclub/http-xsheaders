@@ -321,7 +321,140 @@ it for cloning and instead implemented our C-level struct cloning.
 
 =back
 
+=head1 BENCHMARKS
+
+    HTTP::Headers 6.05, HTTP::Headers::Fast 0.19, HTTP::XSHeaders 0.200000
+
+    -- as_string
+    Implementation  Time
+    xsheaders       0.00468778222396934
+    fast            0.0964434631535363
+    orig            0.105793242864311
+
+    -- as_string_without_sort
+    Implementation            Time
+    xsheaders_as_str          0.00475378949036912
+    xsheaders_as_str_wo       0.00484256407093758
+    fast_as_str               0.0954295831126767
+    fast_as_str_wo            0.0736790240349744
+    orig                      0.105823918835043
+
+    -- get_content_length
+    Implementation  Time
+    xsheaders       0.0105355231679
+    fast            0.0121647090348415
+    orig            0.0574727505777773
+
+    -- get_date
+    Implementation  Time
+    xsheaders       0.077750453123065
+    fast            0.0826203668485442
+    orig            0.101090469267193
+
+    -- get_header
+    Implementation  Time
+    xsheaders       0.00505807073565111
+    fast            0.0612525710276364
+    orig            0.0820842156588862
+
+    -- push_header
+    Implementation  Time
+    xsheaders       0.00271070907120684
+    fast            0.0178986201816726
+    orig            0.0242003530752845
+
+    -- push_header_many
+    Implementation  Time
+    xsheaders       0.00426636619488888
+    fast            0.0376390665501822
+    orig            0.0503843871625857
+
+    -- scan
+    Implementation  Time
+    xsheaders       0.0142865143596716
+    fast            0.061759048917916
+    orig            0.0667217048891246
+
+    -- set_date
+    Implementation  Time
+    xsheaders       0.114970609213125
+    fast            0.130542749562301
+    orig            0.168121156055091
+
+    -- set_header
+    Implementation  Time
+    xsheaders       0.0456117003715809
+    fast            0.0868535344701981
+    orig            0.135920422020881
+
 =head1 METHODS
+
+These match the API described in L<HTTP::Headers> and L<HTTP::Headers::Fast>,
+with caveats described above in B<COMPATIBILITY>.
+
+=head2 new
+
+Create a new object.
+
+=head2 clone
+
+Create a new object from this object's headers.
+
+=head2 header
+
+Get or set a header.
+
+=head2 clear
+
+Clears all headers.
+
+=head2 push_header
+
+Add a header value.
+
+=head2 init_header
+
+Initialize a header.
+
+=head2 remove_header
+
+Removes a header.
+
+=head2 remove_content_headers
+
+Removes all content headers.
+
+=head2 as_string
+
+Returns a sorted string representation of all headers.
+
+=head2 as_string_without_sort
+
+Returns a non-sorted string representation of all headers.
+
+=head2 header_field_names
+
+Returns all header field names.
+
+=head2 scan
+
+Apply a function to each header value.
+
+=head2 content_type
+
+Get the content type header.
+
+=head2 content_type_charset
+
+Get the content type charset header.
+
+=head2 referer
+
+Get or set the referer header.
+
+=head2 referrer
+
+Same as C<referer> but in proper English (unlike the HTTP spec).
 
 =head1 AUTHORS
 
@@ -331,10 +464,12 @@ it for cloning and instead implemented our C-level struct cloning.
 
 =item * Sawyer X C<< xsawyerx AT cpan DOT org >>
 
-=head1 TODO
+=head1 THANKS
 
 =over 4
 
-=item * Add ENV variable to control what classes are overridden
+=item * Rafaël Garcia-Suarez
+
+=item * p5pclub
 
 =back
