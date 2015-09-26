@@ -1,3 +1,6 @@
+0.200002    2015-09-27
+            * Actually include the Changes file in the dist.
+
 0.200001    2015-09-27
             * Fix POD and English syntax errors.
             * Fix MANIFEST file.
