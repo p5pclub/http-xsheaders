@@ -1,5 +1,6 @@
 0.200001    2015-09-27
             * Fix POD and English syntax errors.
+            * Fix MANIFEST file.
 
 0.200000    2015-09-25
             * Override HTTP::Headers too.
