@@ -390,7 +390,7 @@ it for cloning and instead implemented our C-level struct cloning.
 =head1 METHODS
 
 These match the API described in L<HTTP::Headers> and L<HTTP::Headers::Fast>,
-with caveats described above in B<COMPATIBILITY>.
+with the caveats described under B<COMPATIBILITY>.
 
 =head2 new
 
