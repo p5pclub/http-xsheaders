@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use XSLoader;
 
-our $VERSION = '0.200002';
+our $VERSION = '0.201000';
 
 eval {
     require HTTP::Headers::Fast;
@@ -270,7 +270,7 @@ HTTP::Headers::Fast.
 
 =head1 VERSION
 
-Version 0.200002
+Version 0.201000
 
 =head1 SYNOPSIS
 

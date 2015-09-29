@@ -1,3 +1,7 @@
+0.201000    2015-09-29
+            * Added all missing methods. Noted them in docs.
+            * Remove all dependency on HTTP::Headers::Fast.
+
 0.200002    2015-09-27
             * Actually include the Changes file in the dist.
 
