@@ -10,19 +10,19 @@ plan tests => 154;
 my($h, $h2);
 sub j { join("|", @_) }
 
-require HTTP::XSHeaders;
-$h = HTTP::Headers::Fast->new;
+use HTTP::XSHeaders;
+$h = HTTP::XSHeaders->new;
 ok($h);
-ok(ref($h), "HTTP::Headers::Fast");
+ok(ref($h), "HTTP::XSHeaders");
 ok($h->as_string, "");
 
-$h = HTTP::Headers::Fast->new(foo => "bar", foo => "baaaaz", Foo => "baz");
+$h = HTTP::XSHeaders->new(foo => "bar", foo => "baaaaz", Foo => "baz");
 ok($h->as_string, "Foo: bar\nFoo: baaaaz\nFoo: baz\n");
 
-$h = HTTP::Headers::Fast->new(foo => ["bar", "baz"]);
+$h = HTTP::XSHeaders->new(foo => ["bar", "baz"]);
 ok($h->as_string, "Foo: bar\nFoo: baz\n");
 
-$h = HTTP::Headers::Fast->new(foo => 1, bar => 2, foo_bar => 3);
+$h = HTTP::XSHeaders->new(foo => 1, bar => 2, foo_bar => 3);
 ok($h->as_string, "Bar: 2\nFoo: 1\nFoo-Bar: 3\n");
 ok($h->as_string(";"), "Bar: 2;Foo: 1;Foo-Bar: 3;");
 
@@ -77,7 +77,7 @@ ok(j($h->clone->remove_header("Baz")), "2|3");
 ok(j($h->clone->remove_header(qw(Foo Bar Baz Not-There))), "1|2|2|3");
 ok(j($h->clone->remove_header("Not-There")), "");
 
-$h = HTTP::Headers::Fast->new(
+$h = HTTP::XSHeaders->new(
     allow => "GET",
     content => "none",
     content_type => "text/html",
@@ -135,11 +135,11 @@ $h->clear;
 ok($h->as_string, "");
 undef($h2);
 
-$h = HTTP::Headers::Fast->new;
+$h = HTTP::XSHeaders->new;
 ok($h->header_field_names, 0);
 ok(j($h->header_field_names), "");
 
-$h = HTTP::Headers::Fast->new( etag => 1, foo => [2,3],
+$h = HTTP::XSHeaders->new( etag => 1, foo => [2,3],
 			 content_type => "text/plain");
 ok($h->header_field_names, 3);
 ok(j($h->header_field_names), "ETag|Content-Type|Foo");
@@ -161,7 +161,7 @@ ok(j($h->header_field_names), "ETag|Content-Type|Foo");
 
 # CONVENIENCE METHODS
 
-$h = HTTP::Headers::Fast->new;
+$h = HTTP::XSHeaders->new;
 ok($h->date, undef);
 ok($h->date(time), undef);
 ok(j($h->header_field_names), "Date");
@@ -292,7 +292,7 @@ EOT
 
 #---- old tests below -----
 
-$h = new HTTP::Headers::Fast
+$h = new HTTP::XSHeaders
 	mime_version  => "1.0",
 	content_type  => "text/html";
 $h->header(URI => "http://www.oslonett.no/");
@@ -339,7 +339,7 @@ $h2->scan(sub {push(@x, shift);});
 ok(join(";", @x), "Connection;Accept;Accept;Accept;Content-Type;My-Header");
 
 # Check headers with embedded newlines:
-$h = HTTP::Headers::Fast->new(
+$h = HTTP::XSHeaders->new(
 	a => "foo\n\n",
 	b => "foo\nbar",
 	c => "foo\n\nbar\n\n",
@@ -364,7 +364,7 @@ F: foo<<
 EOT
 
 # Check for attempt to send a body
-$h = HTTP::Headers::Fast->new(
+$h = HTTP::XSHeaders->new(
     a => "foo\r\n\r\nevil body" ,
     b => "foo\015\012\015\012evil body" ,
     c => "foo\x0d\x0a\x0d\x0aevil body" ,
@@ -411,7 +411,7 @@ Content-Foo: foo
 EOT
 
 # [RT#30579] IE6 appens "; length = NNNN" on If-Modified-Since (can we handle it)
-$h = HTTP::Headers::Fast->new(
+$h = HTTP::XSHeaders->new(
     if_modified_since => "Sat, 29 Oct 1994 19:43:31 GMT; length=34343"
 );
 ok(gmtime($h->if_modified_since), "Sat Oct 29 19:43:31 1994");

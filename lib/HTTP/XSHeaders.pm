@@ -65,6 +65,8 @@ XSLoader::load( 'HTTP::XSHeaders', $VERSION );
     for my $key (qw/content-length content-language content-encoding title user-agent server from warnings www-authenticate authorization proxy-authenticate proxy-authorization/) {
       (my $meth = $key) =~ s/-/_/g;
       no strict 'refs'; ## no critic
+      *{$meth} = sub { (shift->header($key, @_))[0] };
+
       *{ "HTTP::Headers::$meth" } = sub {
           (shift->header($key, @_))[0];
       };
@@ -198,6 +200,13 @@ sub referer {
     ( $self->header( 'Referer', @_ ) )[0];
 }
 
+*referrer = \&referer;
+
+sub authorization_basic { shift->_basic_auth( "Authorization", @_ ) }
+sub proxy_authorization_basic {
+    shift->_basic_auth( "Proxy-Authorization", @_ );
+}
+
 sub _basic_auth {
     require MIME::Base64;
     my ( $self, $h, $user, $passwd ) = @_;
@@ -215,6 +224,35 @@ sub _basic_auth {
         return split( /:/, $val, 2 );
     }
     return;
+}
+
+sub date                { shift->_date_header( 'date',                @_ ); }
+sub expires             { shift->_date_header( 'expires',             @_ ); }
+sub if_modified_since   { shift->_date_header( 'if-modified-since',   @_ ); }
+sub if_unmodified_since { shift->_date_header( 'if-unmodified-since', @_ ); }
+sub last_modified       { shift->_date_header( 'last-modified',       @_ ); }
+
+# This is used as a private LWP extension.  The Client-Date header is
+# added as a timestamp to a response when it has been received.
+sub client_date { shift->_date_header( 'client-date', @_ ); }
+
+sub content_is_html {
+    my $self = shift;
+    return $self->content_type eq 'text/html' || $self->content_is_xhtml;
+}
+
+sub content_is_xhtml {
+    my $ct = shift->content_type;
+    return $ct eq "application/xhtml+xml"
+      || $ct   eq "application/vnd.wap.xhtml+xml";
+}
+
+sub content_is_xml {
+    my $ct = shift->content_type;
+    return 1 if $ct eq "text/xml";
+    return 1 if $ct eq "application/xml";
+    return 1 if $ct =~ /\+xml$/;
+    return 0;
 }
 
 1;
@@ -387,74 +425,89 @@ it for cloning and instead implemented our C-level struct cloning.
     fast            0.0868535344701981
     orig            0.135920422020881
 
-=head1 METHODS
+=head1 METHODS/ATTRIBUTES
 
 These match the API described in L<HTTP::Headers> and L<HTTP::Headers::Fast>,
 with the caveats described under B<COMPATIBILITY>.
 
+Please see those modules for documentation on what these methods and
+attributes are.
+
 =head2 new
-
-Create a new object.
-
-=head2 clone
-
-Create a new object from this object's headers.
-
-=head2 header
-
-Get or set a header.
-
-=head2 clear
-
-Clears all headers.
-
-=head2 push_header
-
-Add a header value.
-
-=head2 init_header
-
-Initialize a header.
-
-=head2 remove_header
-
-Removes a header.
-
-=head2 remove_content_headers
-
-Removes all content headers.
 
 =head2 as_string
 
-Returns a sorted string representation of all headers.
-
 =head2 as_string_without_sort
 
-Returns a non-sorted string representation of all headers.
+=head2 authorization
 
-=head2 header_field_names
+=head2 authorization_basic
 
-Returns all header field names.
+=head2 clear
 
-=head2 scan
+=head2 clone
 
-Apply a function to each header value.
+=head2 content_encoding
+
+=head2 content_is_html
+
+=head2 content_is_xhtml
+
+=head2 content_is_xml
+
+=head2 content_language
+
+=head2 content_length
 
 =head2 content_type
 
-Get the content type header.
-
 =head2 content_type_charset
 
-Get the content type charset header.
+=head2 date
+
+=head2 expires
+
+=head2 from
+
+=head2 header
+
+=head2 header_field_names
+
+=head2 if_modified_since
+
+=head2 if_unmodified_since
+
+=head2 init_header
+
+=head2 last_modified
+
+=head2 proxy_authenticate
+
+=head2 proxy_authorization
+
+=head2 proxy_authorization_basic
+
+=head2 push_header
 
 =head2 referer
 
-Get or set the referer header.
-
 =head2 referrer
 
-Same as C<referer> but in proper English (unlike the HTTP spec).
+=head2 remove_content_headers
+
+=head2 remove_header
+
+=head2 scan
+
+=head2 server
+
+=head2 title
+
+=head2 user_agent
+
+=head2 warnings
+
+=head2 www_authenticate
 
 =head1 AUTHORS
 
