@@ -13,6 +13,10 @@
 static HList* fetch_hlist(pTHX_ SV* self) {
   HList* hl;
 
+  if (!self) {
+    return 0;
+  }
+
   hl = (HList*) SvIV(*hv_fetch((HV*) SvRV(self),
                      HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, 0));
   return hl;
@@ -38,6 +42,10 @@ new( SV* klass, ... )
     char*  ckey;
 
   CODE:
+    if (!SvOK(klass) || !SvPOK(klass)) {
+      XSRETURN_EMPTY;
+    }
+
     argc = items - 1;
     if ( argc % 2 )
         croak("Expecting a hash as input to constructor");
@@ -72,8 +80,16 @@ clone( SV* self )
     HList* hl = 0;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ clone(%p|%d)", hl, hlist_size(hl)));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
+
     RETVAL = clone_from(aTHX_ 0, self, hl);
 
   OUTPUT: RETVAL
@@ -90,8 +106,15 @@ DESTROY(SV* self, ...)
     int    k;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ destroy(%p|%d)", hl, hlist_size(hl)));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     for (j = 0; j < hl->ulen; ++j) {
       HNode* hn = &hl->data[j];
@@ -114,8 +137,16 @@ clear(SV* self, ...)
     HList* hl = 0;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ clear(%p|%d)", hl, hlist_size(hl)));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
+
     hlist_clear(hl);
 
 
@@ -128,9 +159,16 @@ header_field_names(SV* self)
     HList* hl = 0;
 
   PPCODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ header_field_names(%p|%d), want %d",
           hl, hlist_size(hl), GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     hlist_sort(hl);
     PUTBACK;
@@ -152,14 +190,21 @@ init_header(SV* self, ...)
     char*  ckey;
 
   CODE:
-    argc = items - 1;
-    if (argc != 2) {
-      croak("init_header needs two arguments");
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
     }
 
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ init_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
+
+    argc = items - 1;
+    if (argc != 2) {
+      croak("init_header needs two arguments");
+    }
 
     pkey = ST(1);
     ckey = SvPV(pkey, len);
@@ -184,14 +229,21 @@ push_header(SV* self, ...)
     char*  ckey;
 
   CODE:
-    argc = items - 1;
-    if (argc % 2 != 0) {
-      croak("push_header needs an even number of arguments");
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
     }
 
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ push_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
+
+    argc = items - 1;
+    if (argc % 2 != 0) {
+      croak("push_header needs an even number of arguments");
+    }
 
     for (j = 1; j <= argc; ) {
         if (j > argc) {
@@ -225,11 +277,18 @@ header(SV* self, ...)
     HList* seen = 0; // TODO: make this more efficient; use Perl hash?
 
   PPCODE:
-    argc = items - 1;
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
+    argc = items - 1;
     do {
       if (argc == 0) {
         croak("header called with no arguments");
@@ -308,11 +367,18 @@ remove_header(SV* self, ...)
     int    total = 0;
 
   PPCODE:
-    argc = items - 1;
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ remove_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
+    argc = items - 1;
     for (j = 1; j <= argc; ++j) {
       pkey = ST(j);
       ckey = SvPV(pkey, len);
@@ -356,9 +422,16 @@ remove_content_headers(SV* self, ...)
     int    j;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ remove_content_headers(%p|%d)",
           hl, hlist_size(hl)));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     extra = clone_from(aTHX_ 0, self, 0);
     to = fetch_hlist(aTHX_ extra);
@@ -384,8 +457,15 @@ as_string(SV* self, ...)
     int size = 0;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ as_string(%p|%d) %d", hl, hlist_size(hl), items));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     const char* cendl = "\n";
     if ( items > 1 ) {
@@ -410,8 +490,15 @@ as_string_without_sort(SV* self, ...)
     int size = 0;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ as_string_without_sort(%p|%d) %d", hl, hlist_size(hl), items));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     const char* cendl = "\n";
     if ( items > 1 ) {
@@ -436,8 +523,15 @@ scan(SV* self, CV* sub)
     int    k;
 
   CODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ scan(%p|%d)", hl, hlist_size(hl)));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
 
     hlist_sort(hl);
     for (j = 0; j < hl->ulen; ++j) {
