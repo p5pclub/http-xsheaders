@@ -331,15 +331,38 @@ C<as_string> method does weird stuff in order to keep the original
 indentation. This is unnecessary and unhelpful. We simply add one space as
 indentation after the first newline.
 
-=item * No messing around in header names and casing
+=item * Normalisation of header names
 
-The headers are stored as given (C<MY-HeaDER> stays C<MY-HeaDER>) and
-compared as lowercase. We do not uppercase or lowercase anything (other
-than for comparing header names internally).
+When a given header is one of the standard HTTP headers, we convert it to the
+standard casing; otherwise, we normalise it by:
 
-=item * Case normalization using leading colon is not supported
+=over 4
 
-Following the previous item, we also do not normalize based on leading colon.
+=item * Converting each underscore to a hyphen.
+
+=item * Converting the first letter of each word to uppercase.
+
+=item * Converting the rest of the letters of each word to lowercase.
+
+=back
+
+For example:
+
+=over 4
+
+=item * Accept-Encoding => Accept-Encoding
+
+=item * www-authenticate => WWW-Authenticate (notice the weird standard case
+for WWW)
+
+=item * my_header => My-Header
+
+=back
+
+=item * Literal header names using leading colon are not supported
+
+Following the previous item, we don't treat an initial colon character in any
+special way.
 
 =item * C<$TRANSLATE_UNDERSCORE> is not supported
 
