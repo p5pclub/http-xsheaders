@@ -20,6 +20,16 @@ WriteMakefile(
 #    DEFINE         => '-DGMEM_CHECK -DGLOG_SHOW',
     INC            => '-I.',
     OBJECT         => '$(O_FILES)',
+    META_MERGE     => {
+        'meta-spec' => { version => 2 },
+        resources   => {
+            repository => {
+                type => 'git',
+                url  => 'git@github.com:p5pclub/http-xsheaders.git',
+                web  => 'https://github.com/p5pclub/http-xsheaders',
+            },
+        },
+    },
 );
 
 # Add -Wall to CCFLAGS without overwriting the defaults
