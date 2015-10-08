@@ -270,10 +270,11 @@ header(SV* self, ...)
     int    argc = 0;
     HList* hl = 0;
     int    j;
-    SV*    pkey;
-    SV*    pval;
+    SV*    pkey = 0;
+    SV*    pval = 0;
     STRLEN len;
-    char*  ckey;
+    char*  ckey = 0;
+    HNode* n = 0;
     HList* seen = 0; // TODO: make this more efficient; use Perl hash?
 
   PPCODE:
@@ -298,7 +299,7 @@ header(SV* self, ...)
       if (argc == 1) {
         pkey = ST(1);
         ckey = SvPV(pkey, len);
-        HNode* n = hlist_get(hl, ckey);
+        n = hlist_get(hl, ckey);
         if (n && plist_size(n->values) > 0) {
           PUTBACK;
           return_plist(aTHX_ n->values, "header1", GIMME_V);
@@ -331,7 +332,7 @@ header(SV* self, ...)
             hlist_add(seen, ckey, 0);
           }
 
-          HNode* n = hlist_get(hl, ckey);
+          n = hlist_get(hl, ckey);
           if (n) {
             if (j > argc && plist_size(n->values) > 0) {
               /* Last value, return its current contents */
@@ -349,6 +350,52 @@ header(SV* self, ...)
       hlist_destroy(seen);
       break;
     } while (0);
+
+
+#
+# _header
+#
+# Yes, this is an internal function, but it is used by some modules!
+# So far, I am aware of HTTP::Cookies as one of the culprits.
+# Luckily, they only use it with a single arg, which will be the
+# ONLY usecase supported, at least for now.
+#
+void
+_header(SV* self, ...)
+  PREINIT:
+    int    argc = 0;
+    HList* hl = 0;
+    SV*    pkey = 0;
+    STRLEN len;
+    char*  ckey = 0;
+    HNode* n = 0;
+
+  PPCODE:
+    if (!SvOK(self) || !sv_isobject(self)) {
+      XSRETURN_EMPTY;
+    }
+
+    hl = fetch_hlist(aTHX_ self);
+    GLOG(("=X= @@@ header(%p|%d), %d params, want %d",
+          hl, hlist_size(hl), argc, GIMME_V));
+    if (!hl) {
+      XSRETURN_EMPTY;
+    }
+
+    argc = items - 1;
+    if (argc != 1) {
+      croak("_header not called with one argument");
+      XSRETURN_EMPTY;
+    }
+
+    pkey = ST(1);
+    ckey = SvPV(pkey, len);
+    n = hlist_get(hl, ckey);
+    if (n && plist_size(n->values) > 0) {
+      PUTBACK;
+      return_plist(aTHX_ n->values, "_header", GIMME_V);
+      SPAGAIN;
+    }
 
 
 #

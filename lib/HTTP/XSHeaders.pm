@@ -13,6 +13,7 @@ eval {
     *HTTP::Headers::Fast::DESTROY                = *HTTP::XSHeaders::DESTROY;
     *HTTP::Headers::Fast::clone                  = *HTTP::XSHeaders::clone;
     *HTTP::Headers::Fast::header                 = *HTTP::XSHeaders::header;
+    *HTTP::Headers::Fast::_header                = *HTTP::XSHeaders::_header;
     *HTTP::Headers::Fast::clear                  = *HTTP::XSHeaders::clear;
     *HTTP::Headers::Fast::push_header            = *HTTP::XSHeaders::push_header;
     *HTTP::Headers::Fast::init_header            = *HTTP::XSHeaders::init_header;
@@ -40,6 +41,7 @@ eval {
     *HTTP::Headers::new                    = *HTTP::XSHeaders::new;
     *HTTP::Headers::clone                  = *HTTP::XSHeaders::clone;
     *HTTP::Headers::header                 = *HTTP::XSHeaders::header;
+    *HTTP::Headers::_header                = *HTTP::XSHeaders::_header;
     *HTTP::Headers::clear                  = *HTTP::XSHeaders::clear;
     *HTTP::Headers::push_header            = *HTTP::XSHeaders::push_header;
     *HTTP::Headers::init_header            = *HTTP::XSHeaders::init_header;
