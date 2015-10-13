@@ -94,7 +94,7 @@ eval { require Test::Fatal; 1 } and do {
     like(
         Test::Fatal::exception(sub { $h->scan(undef) }),
         #qr/sub is not a CODE reference/,
-        qr/NOT A CV/,
+        qr/Second argument must be a CODE reference/,
         'scan() without coderef',
     );
 

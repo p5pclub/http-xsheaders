@@ -563,7 +563,7 @@ as_string_without_sort(SV* self, ...)
 
 
 void
-scan(SV* self, CV* sub)
+scan(SV* self, SV* sub)
   PREINIT:
     HList* hl = 0;
     int    j;
@@ -573,6 +573,9 @@ scan(SV* self, CV* sub)
     if (!SvOK(self) || !sv_isobject(self)) {
       XSRETURN_EMPTY;
     }
+
+    if (!SvOK(sub) || !SvRV(sub) || SvTYPE( SvRV(sub) ) != SVt_PVCV )
+        croak("Second argument must be a CODE reference");
 
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ scan(%p|%d)", hl, hlist_size(hl)));
@@ -597,7 +600,7 @@ scan(SV* self, CV* sub)
         PUSHs( pheader );
         PUSHs( value );
         PUTBACK;
-        call_sv( (SV *)sub, G_DISCARD );
+        call_sv( (SV *)SvRV(sub), G_DISCARD );
 
         FREETMPS;
         LEAVE;
