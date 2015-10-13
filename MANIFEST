@@ -21,6 +21,8 @@ t/as_string_without_sort.t
 t/charset.t
 t/headers.t
 t/memory_leak.t
+t/_header.t
+t/validate_invocant.t
 util.c
 util.h
 XSHeaders.xs
