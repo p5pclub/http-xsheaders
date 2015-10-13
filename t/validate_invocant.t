@@ -70,22 +70,39 @@ Key0: value
 Key2: value2
 EOS
 
+$|++;
 eval { require Test::Fatal; 1 } and do {
     # test invalid call to scan
-    like(
-        Test::Fatal::exception(sub { HTTP::XSHeaders::scan(undef, undef) }),
-        qr/sub is not a CODE reference/,
+    is(
+        HTTP::XSHeaders::scan(undef, undef),
+        undef,
         'scan() without coderef',
     );
 
+    is(
+        HTTP::XSHeaders::scan('key0', undef),
+        undef,
+        'scan() with string as self',
+    );
+
     like(
-        Test::Fatal::exception(sub { HTTP::XSHeaders::scan('key0', undef) }),
-        qr/sub is not a CODE reference/,
-        'scan() with key but without coderef',
+        Test::Fatal::exception(sub { $h->scan() }),
+        qr/\QUsage: HTTP::XSHeaders::scan(self, sub)\E/,
+        'scan() without arguments',
+    );
+
+    like(
+        Test::Fatal::exception(sub { $h->scan(undef) }),
+        #qr/sub is not a CODE reference/,
+        qr/NOT A CV/,
+        'scan() without coderef',
+    );
+
+    is(
+        $h->scan(sub {1} ),
+        undef,
+        'scan() with coderef',
     );
 };
-
-is( HTTP::XSHeaders::scan(undef, sub {}), undef, 'scan(undef)' );
-is( HTTP::XSHeaders::scan("key0", sub {}), undef, 'scan with arg' );
 
 done_testing;
