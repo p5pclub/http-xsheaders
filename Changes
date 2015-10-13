@@ -1,3 +1,10 @@
+0.300000    2015-10-13
+            * Add simple GET op implementation of internal method _header()
+              used by HTTP::Cookies::extract_cookies().
+            * Handle uninitialized value warning caused by XS typemap when
+              calling scan() with an undef for a coderef.
+            * Improve tests.
+
 0.201000    2015-09-29
             * Added all missing methods. Noted them in docs.
             * Remove all dependency on HTTP::Headers::Fast.
