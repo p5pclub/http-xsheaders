@@ -36,11 +36,11 @@ eval { require Test::Fatal; 1 } and do {
         qr/\Q_header not called with one argument\E/,
         '_header() without args',
     );
-    is(
-        $h->_header(undef),
-        undef,
-        '_header() with undef'
-        );
+    like(
+        Test::Fatal::exception(sub { $h->_header(undef) }),
+        qr/\Q_header not called with one string argument\E/,
+        '_header() with undef',
+    );
 };
 
 done_testing;

@@ -384,10 +384,12 @@ _header(SV* self, ...)
     argc = items - 1;
     if (argc != 1) {
       croak("_header not called with one argument");
-      XSRETURN_EMPTY;
     }
 
     pkey = ST(1);
+    if (!SvOK(pkey) || !SvPOK(pkey)) {
+      croak("_header not called with one string argument");
+    }
     ckey = SvPV(pkey, len);
     n = hlist_get(hl, ckey);
     if (n && plist_size(n->values) > 0) {
