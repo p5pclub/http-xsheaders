@@ -293,7 +293,6 @@ header(SV* self, ...)
     do {
       if (argc == 0) {
         croak("header called with no arguments");
-        break;
       }
 
       if (argc == 1) {
@@ -310,7 +309,6 @@ header(SV* self, ...)
 
       if (argc % 2 != 0) {
         croak("init_header needs one or an even number of arguments");
-        break;
       }
 
       seen = hlist_create();
