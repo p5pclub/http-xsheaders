@@ -1,6 +1,9 @@
 use strict;
 use warnings;
+
 use Test::More;
+plan tests => 40;
+
 use HTTP::XSHeaders;
 
 my $h = HTTP::XSHeaders->new;

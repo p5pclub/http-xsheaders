@@ -1,6 +1,6 @@
-#!perl -w
-
 use strict;
+use warnings;
+
 use Test qw(plan ok skip);
 eval { require URI; 1; }
 or do { print "1..0 # SKIP URI is required for this test\n"; exit 0; };

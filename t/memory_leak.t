@@ -1,7 +1,8 @@
-#!perl
 use strict;
 use warnings;
+
 use Test::More;
+
 use HTTP::XSHeaders;
 
 eval { require Test::MemoryGrowth; 1; }
