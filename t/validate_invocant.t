@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-plan tests => 40;
+plan tests => 46;
 
 use HTTP::XSHeaders;
 
@@ -16,7 +16,6 @@ is( HTTP::XSHeaders::clear(undef), undef, 'clear(undef)' );
 is( HTTP::XSHeaders::clear("key0"), undef, 'clear with arg' );
 is( $h->clear(), undef, 'clear()' );
 
-is( HTTP::XSHeaders::init_header(undef), undef, 'init_header(undef)' );
 is( HTTP::XSHeaders::init_header("key0"), undef, 'init_header with arg' );
 
 is( HTTP::XSHeaders::header_field_names(undef), undef, 'header_field_names(undef)' );
@@ -96,8 +95,7 @@ eval { require Test::Fatal; 1 } and do {
 
     like(
         Test::Fatal::exception(sub { $h->scan(undef) }),
-        #qr/sub is not a CODE reference/,
-        qr/Second argument must be a CODE reference/,
+        qr/\QSecond argument must be a CODE reference\E/,
         'scan() without coderef',
     );
 
@@ -106,6 +104,43 @@ eval { require Test::Fatal; 1 } and do {
         undef,
         'scan() with coderef',
     );
+
+    like(
+        Test::Fatal::exception(sub { HTTP::XSHeaders::init_header() }),
+        qr/\QUsage: HTTP::XSHeaders::init_header(self, ...)\E/,
+        'HTTP::XSHeaders::init_header()'
+        );
+    is(
+        Test::Fatal::exception(sub { HTTP::XSHeaders::init_header(undef) }),
+        undef,
+        'HTTP::XSHeaders::init_header(undef)'
+        );
+    is(
+        Test::Fatal::exception(sub { HTTP::XSHeaders::init_header(undef, undef) }),
+        undef,
+        'HTTP::XSHeaders::init_header(undef, undef)'
+        );
+    is(
+        Test::Fatal::exception(sub { HTTP::XSHeaders::init_header(undef, undef, undef) }),
+        undef,
+        'HTTP::XSHeaders::init_header(undef, undef, undef)'
+        );
+    like(
+        Test::Fatal::exception(sub { $h->init_header() }),
+        qr/\Qinit_header needs two arguments\E/,
+        'init_header()'
+        );
+    like(
+        Test::Fatal::exception(sub { $h->init_header(undef) }),
+        qr/\Qinit_header needs two arguments\E/,
+        'init_header(undef)'
+        );
+    like(
+        Test::Fatal::exception(sub { $h->init_header(undef, undef) }),
+        qr/\Qinit_header not called with a first string argument\E/,
+        'init_header(undef, undef)'
+        );
+
 };
 
 done_testing;

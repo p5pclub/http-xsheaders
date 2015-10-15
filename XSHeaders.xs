@@ -207,7 +207,11 @@ init_header(SV* self, ...)
       croak("init_header needs two arguments");
     }
 
+    /* TODO: apply this check everywhere! */
     pkey = ST(1);
+    if (!SvOK(pkey) || !SvPOK(pkey)) {
+      croak("init_header not called with a first string argument");
+    }
     ckey = SvPV(pkey, len);
     pval = ST(2);
 
