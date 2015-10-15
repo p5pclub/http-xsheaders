@@ -47,8 +47,9 @@ new( SV* klass, ... )
     }
 
     argc = items - 1;
-    if ( argc % 2 )
-        croak("Expecting a hash as input to constructor");
+    if ( argc % 2 ) {
+      croak("Expecting a hash as input to constructor");
+    }
 
     GLOG(("=X= @@@ new()"));
     self = clone_from(aTHX_ klass, 0, 0);
@@ -56,17 +57,17 @@ new( SV* klass, ... )
 
     /* create the initial list */
     for (j = 1; j <= argc; ) {
-        pkey = ST(j++);
+      pkey = ST(j++);
 
-        /* did we reach the end by any chance? */
-        if (j > argc) {
-          break;
-        }
+      /* did we reach the end by any chance? */
+      if (j > argc) {
+        break;
+      }
 
-        pval = ST(j++);
-        ckey = SvPV_nolen(pkey);
-        GLOG(("=X= Will set [%s] to [%s]", ckey, SvPV_nolen(pval)));
-        set_value(aTHX_ hl, ckey, pval);
+      pval = ST(j++);
+      ckey = SvPV_nolen(pkey);
+      GLOG(("=X= Will set [%s] to [%s]", ckey, SvPV_nolen(pval)));
+      set_value(aTHX_ hl, ckey, pval);
     }
 
     RETVAL = self;
@@ -572,8 +573,9 @@ scan(SV* self, SV* sub)
       XSRETURN_EMPTY;
     }
 
-    if (!SvOK(sub) || !SvRV(sub) || SvTYPE( SvRV(sub) ) != SVt_PVCV )
-        croak("Second argument must be a CODE reference");
+    if (!SvOK(sub) || !SvRV(sub) || SvTYPE( SvRV(sub) ) != SVt_PVCV ) {
+      croak("Second argument must be a CODE reference");
+    }
 
     hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ scan(%p|%d)", hl, hlist_size(hl)));
