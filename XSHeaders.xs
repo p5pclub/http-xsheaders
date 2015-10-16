@@ -22,19 +22,11 @@ static HList* fetch_hlist(pTHX_ SV* self) {
   return hl;
 }
 
-static bool THX_sv_isa_blessed_HV(pTHX_ SV* sv) {
-  SvGETMAGIC(sv);
-  if (!SvROK(sv))
-      return FALSE;
-  sv = SvRV(sv);
-  return (SvOBJECT(sv) && SvTYPE(sv) == SVt_PVHV);
-}
-
 static HList * THX_sv_2Hlist(pTHX_ SV* sv, const char *name) {
   HV* hv;
   SV** svp;
 
-  if (THX_sv_isa_blessed_HV(sv)) {
+  if (sv_isobject(sv) && SvTYPE(SvRV(sv)) == SVt_PVHV) {
     hv = (HV*) SvRV(sv);
     svp = hv_fetch(hv, HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, 0);
     if (svp)
