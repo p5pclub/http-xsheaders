@@ -8,38 +8,113 @@
 #include "util.h"
 #include "header.h"
 
-#define HLIST_KEY_STR "hlist"
+#if defined(USE_ITHREADS) && !defined(sv_dup_inc)
+# define sv_dup_inc(sv, param) SvREFCNT_inc(sv_dup(sv, param))
+#endif
 
-static SV * THX_newSV_HList(pTHX_ HList* hl, HV *stash) {
+#ifndef PERL_UNUSED_ARG
+# define PERL_UNUSED_ARG(x) ((void)x)
+#endif
+
+static MAGIC* THX_mg_find(pTHX_ SV* sv, const MGVTBL* const vtbl) {
+    MAGIC* mg;
+
+    if (SvTYPE(sv) < SVt_PVMG)
+      return NULL;
+
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+      if(mg->mg_virtual == vtbl)
+        return mg;
+    }
+    return NULL;
+}
+
+static int THX_mg_free(pTHX_ SV* const sv, MAGIC* const mg) {
+  HList* const hl = (HList*)mg->mg_ptr;
+  int j, k;
+
+  GLOG(("=X= @@@ mg_free(%p|%d)", hl, hlist_size(hl)));
+
+  for (j = 0; j < hl->ulen; ++j) {
+    HNode* hn = &hl->data[j];
+    PList* pl = hn->values;
+    for (k = 0; k < pl->ulen; ++k) {
+      PNode* pn = &pl->data[k];
+      SvREFCNT_dec((SV*)pn->ptr);
+    }
+  }
+
+  hlist_destroy(hl);
+  return 0;
+}
+
+static int THX_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
+#ifdef USE_ITHREADS
+  HList* const hl = (HList*)mg->mg_ptr;
+  HList* clone;
+  int j, k;
+
+  GLOG(("=X= @@@ mg_dup(%p|%d)", hl, hlist_size(hl)));
+
+  if (!(clone = hlist_clone(hl)))
+    croak("Could not clone HList object");
+
+  for (j = 0; j < clone->ulen; ++j) {
+    HNode* hnode = &clone->data[j];
+    PList* plist = hnode->values;
+    for (k = 0; k < plist->ulen; ++k) {
+      PNode* pnode = &plist->data[k];
+      pnode->ptr = sv_dup_inc((SV*)pnode->ptr, param);
+    }
+  }
+  mg->mg_ptr = (char *)clone;
+#else
+  PERL_UNUSED_ARG(mg);
+  PERL_UNUSED_ARG(param);
+#endif
+  return 0;
+}
+
+static MGVTBL const hlist_mgvtbl = {
+    NULL,        /* get */
+    NULL,        /* set */
+    NULL,        /* len */
+    NULL,        /* clear */
+    THX_mg_free, /* free */
+    NULL,        /* copy */
+    THX_mg_dup,  /* dup */
+#ifdef MGf_LOCAL
+    NULL,        /* local */
+#endif
+};
+
+static SV * THX_newSV_HList(pTHX_ HList* const hl, HV * const stash) {
+  MAGIC *mg;
   HV *hv;
-  SV *rv, *iv;
+  SV *rv;
 
   GLOG(("=X= Will bless new object"));
 
   hv = newHV();
   rv = newRV_noinc((SV*)hv);
+  mg = sv_magicext((SV*)hv, NULL, PERL_MAGIC_ext, &hlist_mgvtbl, (char *)hl, 0);
+  mg->mg_flags |= MGf_DUP;
   sv_bless(rv, stash);
   sv_2mortal(rv);
-
-  iv = newSViv(PTR2IV(hl));
-  if (!hv_store(hv, HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, iv, 0))
-    croak("panic: Could not store Hlist in HV");
-
   return rv;
 }
 
-static HList * THX_sv_2HList(pTHX_ SV* sv, const char *name) {
-  HV* hv;
-  SV** svp;
+static HList * THX_sv_2HList(pTHX_ SV* const sv, const char *name) {
+  MAGIC* mg = NULL;
 
-  if (sv_isobject(sv) && SvTYPE(SvRV(sv)) == SVt_PVHV) {
-    hv = (HV*) SvRV(sv);
-    svp = hv_fetch(hv, HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, 0);
-    if (svp)
-      return (HList*) SvIV(*svp);
-  }
+  SvGETMAGIC(sv);
+  if (SvROK(sv))
+    mg = THX_mg_find(aTHX_ SvRV(sv), &hlist_mgvtbl);
 
-  croak("%s is not an instance of HTTP::XSHeaders", name);
+  if (!mg)
+    croak("%s is not an instance of HTTP::XSHeaders", name);
+
+  return (HList*)mg->mg_ptr;
 }
 
 #define newSV_HList(hl, stash) \
@@ -123,30 +198,6 @@ clone(HList* hl)
     }
 
     XSRETURN(1);
-
-
-#
-# Object's destructor, called automatically
-#
-void
-DESTROY(HList* hl, ...)
-  PREINIT:
-    int j;
-    int k;
-
-  CODE:
-    GLOG(("=X= @@@ destroy(%p|%d)", hl, hlist_size(hl)));
-
-    for (j = 0; j < hl->ulen; ++j) {
-      HNode* hn = &hl->data[j];
-      PList* pl = hn->values;
-      for (k = 0; k < pl->ulen; ++k) {
-        PNode* pn = &pl->data[k];
-        sv_2mortal( (SV*) pn->ptr );
-      }
-    }
-
-    hlist_destroy(hl);
 
 
 #
