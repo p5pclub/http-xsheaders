@@ -22,6 +22,27 @@ static HList* fetch_hlist(pTHX_ SV* self) {
   return hl;
 }
 
+static bool THX_sv_isa_blessed_HV(pTHX_ SV* sv) {
+  SvGETMAGIC(sv);
+  if (!SvROK(sv))
+      return FALSE;
+  sv = SvRV(sv);
+  return (SvOBJECT(sv) && SvTYPE(sv) == SVt_PVHV);
+}
+
+static HList * THX_sv_2Hlist(pTHX_ SV* sv, const char *name) {
+  HV* hv;
+  SV** svp;
+
+  if (THX_sv_isa_blessed_HV(sv)) {
+    hv = (HV*) SvRV(sv);
+    svp = hv_fetch(hv, HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, 0);
+    if (svp)
+      return (HList*) SvIV(*svp);
+  }
+
+  croak("%s is not an instance of HTTP::XSHeaders", name);
+}
 
 MODULE = HTTP::XSHeaders        PACKAGE = HTTP::XSHeaders
 PROTOTYPES: DISABLE
@@ -76,22 +97,10 @@ new( SV* klass, ... )
 
 
 SV *
-clone( SV* self )
-  PREINIT:
-    HList* hl = 0;
-
+clone(HList* hl)
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ clone(%p|%d)", hl, hlist_size(hl)));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
-
-    RETVAL = clone_from(aTHX_ 0, self, hl);
+    RETVAL = clone_from(aTHX_ 0, ST(0), hl);
 
   OUTPUT: RETVAL
 
@@ -100,22 +109,13 @@ clone( SV* self )
 # Object's destructor, called automatically
 #
 void
-DESTROY(SV* self, ...)
+DESTROY(HList* hl, ...)
   PREINIT:
-    HList* hl = 0;
-    int    j;
-    int    k;
+    int j;
+    int k;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ destroy(%p|%d)", hl, hlist_size(hl)));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     for (j = 0; j < hl->ulen; ++j) {
       HNode* hn = &hl->data[j];
@@ -133,21 +133,9 @@ DESTROY(SV* self, ...)
 # Clear object, leaving it as freshly created.
 #
 void
-clear(SV* self, ...)
-  PREINIT:
-    HList* hl = 0;
-
+clear(HList* hl, ...)
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ clear(%p|%d)", hl, hlist_size(hl)));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
-
     hlist_clear(hl);
 
 
@@ -155,22 +143,10 @@ clear(SV* self, ...)
 # Get all the keys in an existing HList.
 #
 void
-header_field_names(SV* self)
-  PREINIT:
-    HList* hl = 0;
-
+header_field_names(HList* hl)
   PPCODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ header_field_names(%p|%d), want %d",
           hl, hlist_size(hl), GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
-
     hlist_sort(hl);
     PUTBACK;
     return_hlist(aTHX_ hl, "header_field_names", GIMME_V);
@@ -181,27 +157,17 @@ header_field_names(SV* self)
 # init_header
 #
 void
-init_header(SV* self, ...)
+init_header(HList* hl, ...)
   PREINIT:
     int    argc = 0;
-    HList* hl = 0;
     SV*    pkey;
     SV*    pval;
     STRLEN len;
     char*  ckey;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ init_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
-
     argc = items - 1;
     if (argc != 2) {
       croak("init_header needs two arguments");
@@ -223,10 +189,9 @@ init_header(SV* self, ...)
 # push_header
 #
 void
-push_header(SV* self, ...)
+push_header(HList* hl, ...)
   PREINIT:
     int    argc = 0;
-    HList* hl = 0;
     int    j;
     SV*    pkey;
     SV*    pval;
@@ -234,16 +199,8 @@ push_header(SV* self, ...)
     char*  ckey;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ push_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     argc = items - 1;
     if (argc % 2 != 0) {
@@ -270,10 +227,9 @@ push_header(SV* self, ...)
 # header
 #
 void
-header(SV* self, ...)
+header(HList* hl, ...)
   PREINIT:
     int    argc = 0;
-    HList* hl = 0;
     int    j;
     SV*    pkey = 0;
     SV*    pval = 0;
@@ -283,16 +239,8 @@ header(SV* self, ...)
     HList* seen = 0; // TODO: make this more efficient; use Perl hash?
 
   PPCODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     argc = items - 1;
     do {
@@ -364,26 +312,17 @@ header(SV* self, ...)
 # ONLY usecase supported, at least for now.
 #
 void
-_header(SV* self, ...)
+_header(HList* hl, ...)
   PREINIT:
     int    argc = 0;
-    HList* hl = 0;
     SV*    pkey = 0;
     STRLEN len;
     char*  ckey = 0;
     HNode* n = 0;
 
   PPCODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     argc = items - 1;
     if (argc != 1) {
@@ -407,10 +346,9 @@ _header(SV* self, ...)
 # remove_header
 #
 void
-remove_header(SV* self, ...)
+remove_header(HList* hl, ...)
   PREINIT:
     int    argc = 0;
-    HList* hl = 0;
     int    j;
     SV*    pkey;
     STRLEN len;
@@ -419,16 +357,8 @@ remove_header(SV* self, ...)
     int    total = 0;
 
   PPCODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ remove_header(%p|%d), %d params, want %d",
           hl, hlist_size(hl), argc, GIMME_V));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     argc = items - 1;
     for (j = 1; j <= argc; ++j) {
@@ -465,27 +395,18 @@ remove_header(SV* self, ...)
 # remove_content_headers
 #
 SV*
-remove_content_headers(SV* self, ...)
+remove_content_headers(HList* hl, ...)
   PREINIT:
-    HList* hl = 0;
     SV*    extra = 0;
     HList* to = 0;
     HNode* n = 0;
     int    j;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ remove_content_headers(%p|%d)",
           hl, hlist_size(hl)));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
-    extra = clone_from(aTHX_ 0, self, 0);
+    extra = clone_from(aTHX_ 0, ST(0), 0);
     to = fetch_hlist(aTHX_ extra);
     for (j = 0; j < hl->ulen; ) {
       n = &hl->data[j];
@@ -502,22 +423,13 @@ remove_content_headers(SV* self, ...)
 
 
 const char*
-as_string(SV* self, ...)
+as_string(HList* hl, ...)
   PREINIT:
-    HList* hl = 0;
     char* str = 0;
     int size = 0;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ as_string(%p|%d) %d", hl, hlist_size(hl), items));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     const char* cendl = "\n";
     if ( items > 1 ) {
@@ -535,22 +447,13 @@ as_string(SV* self, ...)
 
 
 const char*
-as_string_without_sort(SV* self, ...)
+as_string_without_sort(HList* hl, ...)
   PREINIT:
-    HList* hl = 0;
     char* str = 0;
     int size = 0;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
-
-    hl = fetch_hlist(aTHX_ self);
     GLOG(("=X= @@@ as_string_without_sort(%p|%d) %d", hl, hlist_size(hl), items));
-    if (!hl) {
-      XSRETURN_EMPTY;
-    }
 
     const char* cendl = "\n";
     if ( items > 1 ) {
@@ -568,25 +471,16 @@ as_string_without_sort(SV* self, ...)
 
 
 void
-scan(SV* self, SV* sub)
+scan(HList* hl, SV* sub)
   PREINIT:
-    HList* hl = 0;
-    int    j;
-    int    k;
+    int j;
+    int k;
 
   CODE:
-    if (!SvOK(self) || !sv_isobject(self)) {
-      XSRETURN_EMPTY;
-    }
+    GLOG(("=X= @@@ scan(%p|%d)", hl, hlist_size(hl)));
 
     if (!SvOK(sub) || !SvRV(sub) || SvTYPE( SvRV(sub) ) != SVt_PVCV ) {
       croak("Second argument must be a CODE reference");
-    }
-
-    hl = fetch_hlist(aTHX_ self);
-    GLOG(("=X= @@@ scan(%p|%d)", hl, hlist_size(hl)));
-    if (!hl) {
-      XSRETURN_EMPTY;
     }
 
     hlist_sort(hl);
