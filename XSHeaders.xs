@@ -10,19 +10,25 @@
 
 #define HLIST_KEY_STR "hlist"
 
-static HList* fetch_hlist(pTHX_ SV* self) {
-  HList* hl;
+static SV * THX_newSV_HList(pTHX_ HList* hl, HV *stash) {
+  HV *hv;
+  SV *rv, *iv;
 
-  if (!self) {
-    return 0;
-  }
+  GLOG(("=X= Will bless new object"));
 
-  hl = (HList*) SvIV(*hv_fetch((HV*) SvRV(self),
-                     HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, 0));
-  return hl;
+  hv = newHV();
+  rv = newRV_noinc((SV*)hv);
+  sv_bless(rv, stash);
+  sv_2mortal(rv);
+
+  iv = newSViv(PTR2IV(hl));
+  if (!hv_store(hv, HLIST_KEY_STR, sizeof(HLIST_KEY_STR) - 1, iv, 0))
+    croak("panic: Could not store Hlist in HV");
+
+  return rv;
 }
 
-static HList * THX_sv_2Hlist(pTHX_ SV* sv, const char *name) {
+static HList * THX_sv_2HList(pTHX_ SV* sv, const char *name) {
   HV* hv;
   SV** svp;
 
@@ -36,6 +42,12 @@ static HList * THX_sv_2Hlist(pTHX_ SV* sv, const char *name) {
   croak("%s is not an instance of HTTP::XSHeaders", name);
 }
 
+#define newSV_HList(hl, stash) \
+  THX_newSV_HList(aTHX_ hl, stash)
+
+#define sv_2HList(sv, name) \
+  THX_sv_2HList(aTHX_ sv,  name)
+
 MODULE = HTTP::XSHeaders        PACKAGE = HTTP::XSHeaders
 PROTOTYPES: DISABLE
 
@@ -43,12 +55,11 @@ PROTOTYPES: DISABLE
 #################################################################
 
 
-SV *
+void
 new( SV* klass, ... )
   PREINIT:
     int    argc = 0;
     HList* hl = 0;
-    SV*    self = 0;
     int    j;
     SV*    pkey;
     SV*    pval;
@@ -65,8 +76,10 @@ new( SV* klass, ... )
     }
 
     GLOG(("=X= @@@ new()"));
-    self = clone_from(aTHX_ klass, 0, 0);
-    hl = fetch_hlist(aTHX_ self);
+    if (!(hl = hlist_create()))
+      croak("Could not create new HList object");
+
+    ST(0) = newSV_HList(hl, gv_stashpv(SvPV_nolen(klass), 0));
 
     /* create the initial list */
     for (j = 1; j <= argc; ) {
@@ -82,19 +95,34 @@ new( SV* klass, ... )
       GLOG(("=X= Will set [%s] to [%s]", ckey, SvPV_nolen(pval)));
       set_value(aTHX_ hl, ckey, pval);
     }
-
-    RETVAL = self;
-
-  OUTPUT: RETVAL
+    XSRETURN(1);
 
 
-SV *
+void
 clone(HList* hl)
+  PREINIT:
+    HList* clone;
+    int    j;
+    int    k;
   CODE:
     GLOG(("=X= @@@ clone(%p|%d)", hl, hlist_size(hl)));
-    RETVAL = clone_from(aTHX_ 0, ST(0), hl);
 
-  OUTPUT: RETVAL
+    if (!(clone = hlist_clone(hl)))
+      croak("Could not clone HList object");
+
+    ST(0) = newSV_HList(clone, SvSTASH(SvRV(ST(0))));
+
+    /* Clone the SVs into new ones */
+    for (j = 0; j < clone->ulen; ++j) {
+      HNode* hnode = &clone->data[j];
+      PList* plist = hnode->values;
+      for (k = 0; k < plist->ulen; ++k) {
+        PNode* pnode = &plist->data[k];
+        pnode->ptr = newSVsv( (SV*)pnode->ptr );
+      }
+    }
+
+    XSRETURN(1);
 
 
 #
@@ -386,10 +414,9 @@ remove_header(HList* hl, ...)
 #
 # remove_content_headers
 #
-SV*
+void
 remove_content_headers(HList* hl, ...)
   PREINIT:
-    SV*    extra = 0;
     HList* to = 0;
     HNode* n = 0;
     int    j;
@@ -398,8 +425,11 @@ remove_content_headers(HList* hl, ...)
     GLOG(("=X= @@@ remove_content_headers(%p|%d)",
           hl, hlist_size(hl)));
 
-    extra = clone_from(aTHX_ 0, ST(0), 0);
-    to = fetch_hlist(aTHX_ extra);
+    if (!(to = hlist_create()))
+      croak("Could not create new HList object");
+
+    ST(0) = newSV_HList(to, SvSTASH(SvRV(ST(0))));
+
     for (j = 0; j < hl->ulen; ) {
       n = &hl->data[j];
       if (! header_is_entity(n->header)) {
@@ -409,9 +439,7 @@ remove_content_headers(HList* hl, ...)
       hlist_transfer_header(hl, j, to);
     }
 
-    RETVAL = extra;
-
-  OUTPUT: RETVAL
+    XSRETURN(1);
 
 
 const char*

@@ -3,5 +3,5 @@ HList *   T_HLIST
 
 INPUT
 T_HLIST
-  $var = THX_sv_2Hlist(aTHX_ $arg, \"$var\");
+  $var = sv_2HList($arg, \"$var\");
 

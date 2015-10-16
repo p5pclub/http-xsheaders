@@ -16,63 +16,6 @@ static int string_append(char* buf, int pos, const char* str);
 // buf, with maximum length len; use newl as new line terminator.
 static int string_cleanup(const char* str, char* buf, int len, const char* newl);
 
-SV* clone_from(pTHX_ SV* klass, SV* self, HList* old_list) {
-  HList *new_list = 0;
-  HV* new_hash = newHV();
-
-  if ( !new_hash ) {
-    croak("Could not create new hash.");
-  }
-
-  if (!old_list) {
-    new_list = hlist_create();
-    if ( !new_list ) {
-      croak("Could not create new HList object");
-    }
-  } else {
-    int j, k;
-
-    new_list = hlist_clone(old_list);
-    if ( !new_list ) {
-      croak("Could not clone HList object");
-    }
-
-    /* Clone the SVs into new ones */
-    for (j = 0; j < old_list->ulen; ++j) {
-      HNode* hnode = &old_list->data[j];
-      PList* plist = hnode->values;
-      for (k = 0; k < plist->ulen; ++k) {
-        PNode* pnode = &plist->data[k];
-        pnode->ptr = newSVsv( (SV*)pnode->ptr );
-      }
-    }
-  }
-
-  {
-    SV** hlist_created = hv_store( new_hash, "hlist", strlen("hlist"), newSViv((IV)new_list), 0 );
-    if ( !hlist_created ) {
-      croak("Could not store value for 'hlist'. This should not happen.");
-    }
-  }
-
-  GLOG(("=X= Will bless new object"));
-  {
-    SV* them = newRV_noinc( (SV*)new_hash );
-
-    SV* retval = 0;
-    if (klass) {
-      retval = sv_bless( them, gv_stashpv( SvPV_nolen(klass), 0 ) );
-    } else if (self) {
-      const char* klass_name = HvNAME(SvSTASH(SvRV(self)));
-      retval = sv_bless( them, gv_stashpv( klass_name, 0 ) );
-    } else {
-      croak("Could not determine proper class name to bless object.");
-    }
-
-    return retval;
-  }
-}
-
 void set_value(pTHX_ HList* h, const char* ckey, SV* pval) {
   SV *deref;
   AV *array;
