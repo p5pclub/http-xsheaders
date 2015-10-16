@@ -22,15 +22,14 @@ $|++;
 eval { require Test::Fatal; 1 } and do {
     like(
         Test::Fatal::exception(sub { HTTP::XSHeaders::_header() }),
-        qr/\QUsage: HTTP::XSHeaders::_header(self, ...)\E/,
+        qr/\QUsage: HTTP::XSHeaders::_header\E/,
         'HTTP::XSHeaders::_header() without args',
-        );
-    is(
-        HTTP::XSHeaders::_header(undef),
-        undef,
-        'HTTP::XSHeaders::_header() with undef'
-        ) ;
-
+    );
+    like(
+        Test::Fatal::exception(sub { HTTP::XSHeaders::_header(undef) }),
+        qr/\Qis not an instance of HTTP::XSHeaders\E/,
+        'HTTP::XSHeaders::_header() with undef',
+    );
     like(
         Test::Fatal::exception(sub { $h->_header() }),
         qr/\Q_header not called with one argument\E/,
