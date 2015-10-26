@@ -1,3 +1,12 @@
+0.400000    2015-10-26
+            * HTTP::XSHeaders is now thread-safe. (Christian Hansen)
+            * _header() now handles non-string args better.
+            * init_header() now checks for valid type argument.
+            * Use magic to store the internal state. (Christian Hansen)
+            * Use typemaps. (Christian Hansen)
+            * Internal cleanups. (Christian Hansen)
+            * Use Test::More for the tests.
+
 0.300000    2015-10-13
             * Add simple GET op implementation of internal method _header()
               used by HTTP::Cookies::extract_cookies().

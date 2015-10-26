@@ -552,4 +552,6 @@ attributes are.
 
 =item * p5pclub
 
+=item * Christian Hansen
+
 =back
