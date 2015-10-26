@@ -27,3 +27,4 @@ util.c
 util.h
 XSHeaders.xs
 Changes
+typemap
