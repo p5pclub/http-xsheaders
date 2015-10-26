@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use XSLoader;
 
-our $VERSION = '0.300000';
+our $VERSION = '0.400000';
 
 eval {
     require HTTP::Headers::Fast;
@@ -272,7 +272,7 @@ HTTP::Headers::Fast.
 
 =head1 VERSION
 
-Version 0.300000
+Version 0.400000
 
 =head1 SYNOPSIS
 
@@ -295,6 +295,8 @@ of L<HTTP::Headers> and L<HTTP::Headers::Fast> with a fast C implementation.
 You can continue to use L<HTTP::Headers> and L<HTTP::Headers::Fast> and any
 other module that depends on them just like you did before. It's just faster
 now.
+
+Since version 0.400000 HTTP::XSHeaders is considered Thread-Safe.
 
 =head1 WHY
 
