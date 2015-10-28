@@ -5,41 +5,56 @@ use Test::More;
 plan tests => 7;
 
 use HTTP::XSHeaders;
+use t::lib::Utils;
 
 sub j { join('|', @_) }
 
-my $h = new HTTP::XSHeaders;
+my $h = HTTP::XSHeaders->new;
 
 $h->push_header('key1', 'value1-1');
 $h->push_header('key2', 'value2-1');
 $h->push_header('key2', 'value2-2');
 
-is( j($h->_header('key0')), '', 'join inexistent key' );
-is( j($h->_header('key1')), 'value1-1', 'join single-valued key' );
-is( j($h->_header('key2')), 'value2-1|value2-2', 'join multi-valued key' );
+is_deeply(
+    [ $h->header('key0' ) ],
+    [],
+    'inexistent key',
+);
 
-$|++;
-eval { require Test::Fatal; 1 } and do {
-    like(
-        Test::Fatal::exception(sub { HTTP::XSHeaders::_header() }),
-        qr/\QUsage: HTTP::XSHeaders::_header\E/,
-        'HTTP::XSHeaders::_header() without args',
-    );
-    like(
-        Test::Fatal::exception(sub { HTTP::XSHeaders::_header(undef) }),
-        qr/\Qis not an instance of HTTP::XSHeaders\E/,
-        'HTTP::XSHeaders::_header() with undef',
-    );
-    like(
-        Test::Fatal::exception(sub { $h->_header() }),
-        qr/\Q_header not called with one argument\E/,
-        '_header() without args',
-    );
-    like(
-        Test::Fatal::exception(sub { $h->_header(undef) }),
-        qr/\Q_header not called with one string argument\E/,
-        '_header() with undef',
-    );
-};
+is_deeply(
+    [ $h->_header('key1') ],
+    [ 'value1-1' ],
+    'single-valued key',
+);
+
+is_deeply(
+    [ $h->_header('key2') ],
+    [ 'value2-1', 'value2-2' ],
+    'multi-valued key',
+);
+
+like(
+    t::lib::Utils::_try(sub { HTTP::XSHeaders::_header() }),
+    qr/\QUsage: HTTP::XSHeaders::_header\E/,
+    'HTTP::XSHeaders::_header() without args',
+);
+
+like(
+    t::lib::Utils::_try(sub { HTTP::XSHeaders::_header(undef) }),
+    qr/\Qis not an instance of HTTP::XSHeaders\E/,
+    'HTTP::XSHeaders::_header() with undef',
+);
+
+like(
+    t::lib::Utils::_try(sub { $h->_header() }),
+    qr/\Q_header not called with one argument\E/,
+    '_header() without args',
+);
+
+like(
+    t::lib::Utils::_try(sub { $h->_header(undef) }),
+    qr/\Q_header not called with one string argument\E/,
+    '_header() with undef',
+);
 
 done_testing;

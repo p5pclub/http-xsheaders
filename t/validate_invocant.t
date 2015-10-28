@@ -5,6 +5,7 @@ use Test::More;
 plan tests => 44;
 
 use HTTP::XSHeaders;
+use t::lib::Utils;
 
 my $h = HTTP::XSHeaders->new;
 
@@ -84,48 +85,47 @@ Key0: value
 Key2: value2
 EOS
 
-$|++;
-eval { require Test::Fatal; 1 } and do {
-    # test invalid call to scan
-    like(
-        Test::Fatal::exception(sub { $h->scan() }),
-        qr/Usage: HTTP::XSHeaders::scan/,
-        'scan() without arguments',
+# test invalid call to scan
+like(
+    t::lib::Utils::_try(sub { $h->scan() }),
+    qr/Usage: HTTP::XSHeaders::scan/,
+    'scan() without arguments',
+);
+
+like(
+    t::lib::Utils::_try(sub { $h->scan(undef) }),
+    qr/Second argument must be a CODE reference/,
+    'scan() without coderef',
+);
+
+is(
+    $h->scan(sub {1} ),
+    undef,
+    'scan() with coderef',
+);
+
+like(
+    t::lib::Utils::_try(sub { HTTP::XSHeaders::init_header() }),
+    qr/Usage: HTTP::XSHeaders::init_header/,
+    'HTTP::XSHeaders::init_header()'
     );
 
-    like(
-        Test::Fatal::exception(sub { $h->scan(undef) }),
-        qr/Second argument must be a CODE reference/,
-        'scan() without coderef',
-    );
+like(
+    t::lib::Utils::_try(sub { $h->init_header() }),
+    qr/init_header needs two arguments/,
+    'init_header()'
+);
 
-    is(
-        $h->scan(sub {1} ),
-        undef,
-        'scan() with coderef',
-    );
+like(
+    t::lib::Utils::_try(sub { $h->init_header(undef) }),
+    qr/init_header needs two arguments/,
+    'init_header(undef)'
+);
 
-    like(
-        Test::Fatal::exception(sub { HTTP::XSHeaders::init_header() }),
-        qr/Usage: HTTP::XSHeaders::init_header/,
-        'HTTP::XSHeaders::init_header()'
-        );
-    like(
-        Test::Fatal::exception(sub { $h->init_header() }),
-        qr/\Qinit_header needs two arguments\E/,
-        'init_header()'
-        );
-    like(
-        Test::Fatal::exception(sub { $h->init_header(undef) }),
-        qr/\Qinit_header needs two arguments\E/,
-        'init_header(undef)'
-        );
-    like(
-        Test::Fatal::exception(sub { $h->init_header(undef, undef) }),
-        qr/\Qinit_header not called with a first string argument\E/,
-        'init_header(undef, undef)'
-        );
-
-};
+like(
+    t::lib::Utils::_try(sub { $h->init_header(undef, undef) }),
+    qr/init_header not called with a first string argument/,
+    'init_header(undef, undef)'
+);
 
 done_testing;
