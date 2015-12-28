@@ -307,7 +307,7 @@ header(HList* hl, ...)
     STRLEN len;
     char*  ckey = 0;
     HNode* n = 0;
-    HList* seen = 0; // TODO: make this more efficient; use Perl hash?
+    HList* seen = 0; /* TODO: make this more efficient; use Perl hash? */
 
   PPCODE:
     GLOG(("=X= @@@ header(%p|%d), %d params, want %d",

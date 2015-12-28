@@ -40,7 +40,7 @@ HList* hlist_clone(HList* hlist) {
   }
 
   GLOG(("=C= Cloning hlist %p", hlist));
-  // hlist_dump(hlist, stderr);
+  /* hlist_dump(hlist, stderr); */
   HList* p = hlist_create();
   p->flags = hlist->flags;
   int j;
@@ -63,8 +63,8 @@ void hlist_init(HList* hlist) {
   hlist->flags = 0;
 }
 
-// TODO: perhaps we should leave hlist as empty but not delete the chunks we
-// already allocated for it...
+/* TODO: perhaps we should leave hlist as empty but not delete the chunks we */
+/* already allocated for it... */
 void hlist_clear(HList* hlist) {
   if (!hlist) {
     return;

@@ -17,27 +17,27 @@
  * Add a last HNode, update it when getting and adding, try it first when searching.
  */
 
-// when we first allocate a chunk of headers, this is the size we use
-#define HLIST_INITIAL_SIZE   4 // 16
+/* when we first allocate a chunk of headers, this is the size we use */
+#define HLIST_INITIAL_SIZE   4 /* 16 */
 
 #define HLIST_FLAGS_SORTED    0x01
-#define HLIST_FLAGS_SENSITIVE 0x02  // Still unused
-#define HLIST_FLAGS_U_EQ_D    0x04  // Still unused
+#define HLIST_FLAGS_SENSITIVE 0x02  /* Still unused */
+#define HLIST_FLAGS_U_EQ_D    0x04  /* Still unused */
 
 #define HLIST_FLAG_GET(h, f) (h->flags &   f)
 #define HLIST_FLAG_SET(h, f)  h->flags |=  f
 #define HLIST_FLAG_CLR(h, f)  h->flags &= ~f
 
 typedef struct HNode {
-  struct Header* header;  // the header name and proper sorting order
-  struct PList* values;   // the list of values associated with this header
+  struct Header* header;  /* the header name and proper sorting order */
+  struct PList* values;   /* the list of values associated with this header */
 } HNode;
 
 typedef struct HList {
-  HNode* data;            // a chunk of headers (with their respective values)
-  unsigned short alen;    // allocated size of chunk
-  unsigned short ulen;    // actual used size in chunk
-  unsigned long flags;    // flags for this list of headers
+  HNode* data;            /* a chunk of headers (with their respective values) */
+  unsigned short alen;    /* allocated size of chunk */
+  unsigned short ulen;    /* actual used size in chunk */
+  unsigned long flags;    /* flags for this list of headers */
 } HList;
 
 /*

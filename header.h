@@ -11,15 +11,15 @@
  * standard headers.
  */
 
-#define HEADER_TYPE_NONE     999 // should be greater than all other types
+#define HEADER_TYPE_NONE     999 /* should be greater than all other types */
 #define HEADER_TYPE_GENERAL  100
 #define HEADER_TYPE_REQUEST  200
 #define HEADER_TYPE_RESPONSE 300
 #define HEADER_TYPE_ENTITY   400
 
 typedef struct Header {
-  int order;   // the order / grouping of the header
-  char* name;  // the header name
+  int order;   /* the order / grouping of the header */
+  char* name;  /* the header name */
 } Header;
 
 /*

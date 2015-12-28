@@ -17,7 +17,7 @@
  * List of all standard headers, with the correct ordering for them.
  */
 static Header standard_headers[] = {
-  // general headers
+  /* general headers */
   { 100, "Cache-Control"       },
   { 101, "Connection"          },
   { 102, "Date"                },
@@ -28,7 +28,7 @@ static Header standard_headers[] = {
   { 107, "Via"                 },
   { 108, "Warning"             },
 
-  // request headers
+  /* request headers */
   { 200, "Accept"              },
   { 201, "Accept-Charset"      },
   { 202, "Accept-Encoding"     },
@@ -49,7 +49,7 @@ static Header standard_headers[] = {
   { 217, "TE"                  },
   { 218, "User-Agent"          },
 
-  // response headers
+  /* response headers */
   { 300, "Accept-Ranges"       },
   { 301, "Age"                 },
   { 302, "ETag"                },
@@ -60,7 +60,7 @@ static Header standard_headers[] = {
   { 307, "Vary"                },
   { 308, "WWW-Authenticate"    },
 
-  // entity headers
+  /* entity headers */
   { 400, "Allow"               },
   { 401, "Content-Encoding"    },
   { 402, "Content-Language"    },
@@ -109,8 +109,8 @@ void header_destroy(Header* header) {
 
 #define CONVERT(c) c == '_' ? '-' : isupper(c) ? tolower(c) : c
 
-// TODO: this could probably made faster if we precomputed the CONVERTed
-// values instead of doing it over and over again...
+/* TODO: this could probably made faster if we precomputed the CONVERTed */
+/* values instead of doing it over and over again... */
 int header_compare(const char* n1, const char* n2) {
   int p = 0;
   char c1;
@@ -144,7 +144,7 @@ int header_matches_type_or_name(const Header* h, int type, const char* name) {
     return 0;
   }
   cmp = header_compare(name, h->name);
-  // GLOG(("=C= compare [%s] & [%s] => %d", name, h->name, cmp));
+  /* GLOG(("=C= compare [%s] & [%s] => %d", name, h->name, cmp)); */
   return cmp == 0;
 }
 

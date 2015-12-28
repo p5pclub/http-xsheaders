@@ -1,19 +1,17 @@
 #define PERL_NO_GET_CONTEXT     /* we want efficiency */
 #include "EXTERN.h"
 #include "perl.h"
-//#include "XSUB.h"
-//#include "ppport.h"
 
 #include "glog.h"
 #include "gmem.h"
 #include "header.h"
 #include "util.h"
 
-// Append string str at pos in buf.
+/* Append string str at pos in buf. */
 static int string_append(char* buf, int pos, const char* str);
 
-// Cleanup string str (as used in as_string), leaving cleaned up result in
-// buf, with maximum length len; use newl as new line terminator.
+/* Cleanup string str (as used in as_string), leaving cleaned up result in */
+/* buf, with maximum length len; use newl as new line terminator. */
 static int string_cleanup(const char* str, char* buf, int len, const char* newl);
 
 void set_value(pTHX_ HList* h, const char* ckey, SV* pval) {
@@ -145,7 +143,7 @@ void return_plist(pTHX_ PList* list, const char* func, int want) {
       for (j = 0; j < list->ulen; ++j) {
         PNode* node = &list->data[j];
         STRLEN len;
-        SvPV( (SV*)node->ptr, len );  // We just need the lenght
+        SvPV( (SV*)node->ptr, len );  /* We just need the length */
         size += len + 2;
       }
 
@@ -268,7 +266,7 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
     }
     if (isspace(str[j])) {
       if (saw_newline) {
-        // ignore
+        /* ignore */
       } else {
         if (str[j] == '\n') {
           pos = string_append(buf, pos, newl);
