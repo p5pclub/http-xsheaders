@@ -23,6 +23,7 @@ t/headers.t
 t/memory_leak.t
 t/_header.t
 t/validate_invocant.t
+t/lib/Utils.pm
 util.c
 util.h
 XSHeaders.xs
