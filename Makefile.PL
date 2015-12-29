@@ -5,7 +5,7 @@ WriteMakefile(
     NAME           => 'HTTP::XSHeaders',
     VERSION_FROM   => 'lib/HTTP/XSHeaders.pm',
     ABSTRACT_FROM  => 'lib/HTTP/XSHeaders.pm',
-    LICENSE        => 'perl',
+    LICENSE        => 'mit',
     PREREQ_PM      => {
         'Test::More' => 0,
         'Exporter'   => '5.57',
