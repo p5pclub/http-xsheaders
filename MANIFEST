@@ -29,3 +29,4 @@ util.h
 XSHeaders.xs
 Changes
 typemap
+t/lib/Utils.pm

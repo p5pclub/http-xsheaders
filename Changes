@@ -1,3 +1,6 @@
+0.400002    2015-10-28
+            * Do not accidentally require Test::Fatal to install.
+
 0.400001    2015-10-26
             * Whoops, include typemap file in the release!
 
