@@ -1,4 +1,4 @@
-use 5.008005;
+use 5.008009;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
@@ -6,7 +6,7 @@ WriteMakefile(
     VERSION_FROM   => 'lib/HTTP/XSHeaders.pm',
     ABSTRACT_FROM  => 'lib/HTTP/XSHeaders.pm',
     LICENSE        => 'mit',
-    MIN_PERL_VERSION => 5.008,
+    MIN_PERL_VERSION => 5.008009,
     PREREQ_PM      => {
         'Test::More' => 0,
         'Exporter'   => '5.57',
