@@ -1,3 +1,10 @@
+0.400003    2015-12-29
+            * Add LICENSE file (MIT license).
+            * Use C89 instead of C99.
+            * Require minimal version of Perl: 5.8.9.
+              (Earliest successfully tested.)
+            * Previous release also fixed a MANIFEST entry which broke testing.
+
 0.400002    2015-10-28
             * Do not accidentally require Test::Fatal to install.
 
