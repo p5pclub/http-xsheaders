@@ -1,4 +1,4 @@
-package t::lib::Utils;
+package MyTestUtils;
 use strict;
 use warnings;
 
