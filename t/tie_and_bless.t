@@ -8,16 +8,29 @@ package FakeHash {
 use strict;
 use warnings;
 use Test::More;
-use HTTP::XSHeaders;
-use HTTP::Headers;
+
+my $class_base = 'HTTP::Headers';
+my $class_xs = 'HTTP::XSHeaders';
+use_ok($class_base);
+use_ok($class_xs);
 
 tie my %newhash, 'FakeHash';
-my $headers = bless \%newhash => 'HTTP::Headers';
+my $headers = bless \%newhash => $class_base;
 
-is( ref $headers, 'HTTP::Headers', 'Correct reference' );
-is( tied($headers), 'Correct tie' );
+is( ref $headers, $class_base, "Correct reference for hashref: $class_base" );
+ok( tied(%newhash), "Correct tie for hash" );
+is( tied($headers), undef, "Correct tie for hashref: undef" );
 
-$headers->push_header( 'X-Foo' => 'Bar' );
-is( $headers->header('X-Foo'), 'Bar', 'Header was set correctly' );
+my %data = (
+    'X-Foo' => 'Bar',
+);
+foreach my $key (keys %data) {
+    my $val = $data{$key};
+    $headers->push_header( $key, $val );
+}
+foreach my $key (keys %data) {
+    my $val = $data{$key};
+    is( $headers->header($key), $val, "Header $key was set correctly to $val" );
+}
 
 done_testing();
