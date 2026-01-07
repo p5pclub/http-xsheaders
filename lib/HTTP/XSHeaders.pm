@@ -21,6 +21,8 @@ eval {
     *HTTP::Headers::Fast::remove_content_headers = *HTTP::XSHeaders::remove_content_headers;
     *HTTP::Headers::Fast::as_string              = *HTTP::XSHeaders::as_string;
     *HTTP::Headers::Fast::as_string_without_sort = *HTTP::XSHeaders::as_string_without_sort;
+    *HTTP::Headers::Fast::psgi_flatten           = *HTTP::XSHeaders::psgi_flatten;
+    *HTTP::Headers::Fast::psgi_flatten_without_sort = *HTTP::XSHeaders::psgi_flatten_without_sort;
     *HTTP::Headers::Fast::header_field_names     = *HTTP::XSHeaders::header_field_names;
     *HTTP::Headers::Fast::scan                   = *HTTP::XSHeaders::scan;
 
