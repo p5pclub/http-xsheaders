@@ -18,6 +18,7 @@ t/00_compile.t
 t/01-compat.t
 t/02-isa.t
 t/as_string_without_sort.t
+t/as_string_crlf.t
 t/charset.t
 t/headers.t
 t/memory_leak.t
