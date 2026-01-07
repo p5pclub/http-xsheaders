@@ -262,10 +262,12 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
   int j;
   for (j = 0; str[j] != '\0'; ++j) {
     char c = str[j];
-    if (c == '\r') {
-      if (str[j + 1] == '\n') {
-        ++j;
+    int emit_cr = 0;
+    if (c == '\r' && str[j + 1] == '\n') {
+      if (strchr(newl, '\r') == NULL) {
+        emit_cr = 1;
       }
+      ++j;
       c = '\n';
     }
     if (pos >= len) {
@@ -276,6 +278,9 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
         /* ignore */
       } else {
         if (c == '\n') {
+          if (emit_cr && pos < len) {
+            buf[pos++] = '\r';
+          }
           pos = string_append(buf, pos, newl);
           saw_newline = 1;
           last_nonblank = pos-1;

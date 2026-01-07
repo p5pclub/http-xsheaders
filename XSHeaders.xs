@@ -129,6 +129,18 @@ PROTOTYPES: DISABLE
 
 #################################################################
 
+int
+_is_xsheaders(SV* sv)
+  PREINIT:
+    MAGIC* mg = NULL;
+  CODE:
+    SvGETMAGIC(sv);
+    if (SvROK(sv)) {
+      mg = THX_mg_find(aTHX_ SvRV(sv), &hlist_mgvtbl);
+    }
+    RETVAL = mg ? 1 : 0;
+  OUTPUT: RETVAL
+
 
 void
 new( SV* klass, ... )
