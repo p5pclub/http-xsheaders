@@ -261,26 +261,33 @@ static int string_cleanup(const char* str, char* buf, int len, const char* newl)
   int saw_newline = 0;
   int j;
   for (j = 0; str[j] != '\0'; ++j) {
+    char c = str[j];
+    if (c == '\r') {
+      if (str[j + 1] == '\n') {
+        ++j;
+      }
+      c = '\n';
+    }
     if (pos >= len) {
       break;
     }
-    if (isspace(str[j])) {
+    if (isspace((unsigned char)c)) {
       if (saw_newline) {
         /* ignore */
       } else {
-        if (str[j] == '\n') {
+        if (c == '\n') {
           pos = string_append(buf, pos, newl);
           saw_newline = 1;
           last_nonblank = pos-1;
         } else {
-          buf[pos++] = str[j];
+          buf[pos++] = c;
         }
       }
     } else {
       if (saw_newline) {
         buf[pos++] = ' ';
       }
-      buf[pos++] = str[j];
+      buf[pos++] = c;
       last_nonblank = pos-1;
       saw_newline = 0;
     }
